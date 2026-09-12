@@ -1,0 +1,447 @@
+📑 Agenda – Day 01 | Introduction to JavaScript
+
+🚦 Visual Timeline:
+SYNCHRONOUS:
+Task1: ██████████→
+Task2:              ████████→
+Task3:                       ████████→
+Time:  Total = Sum of all tasks
+
+ASYNCHRONOUS:
+Task1: ████████→
+Task2:    ████████→
+Task3:       ████████→
+Task4: ██→
+Time:  Total ≈ Longest task
+
+📊 Comparison Table
+=================================================================================
+Aspect	      ||	  Synchronous   	  ||		Asynchronous	||
+=================================================================================
+Execution		One at a time			Multiple in progress
+Waiting			Blocks until done		Non-blocking
+Order			Predictable (sequential)	Less predictable
+Performance		Slower for I/O			Faster for I/O
+Complexity		Simple to understand		Harder to manage
+Use case		Simple calculations		Network/files/timers
+
+-----------------------------------------------------------------------------
+
+#####
+📋 Overview Table : Naming Standards to be followed
+=================================================================================
+Element	     ||	Convention  ||	Example	     ||		Rule			||
+=================================================================================
+📁 File Names	camelCase	loginPage.js	All lowercase start, no spaces
+📊 Variables	camelCase	userName	Descriptive, starts lowercase
+🏗️ Classes	PascalCase	LoginPage	Starts with uppercase
+🔧 Functions	camelCase	getUserData()	Verb + Noun pattern
+=================================================================================
+#####
+---------------------------------------------------
+// ===== script.js =====
+// No packages/classes needed!
+
+// Global code (runs directly)
+console.log("Program starts here");
+
+// Functions (like Java methods)
+function greetUser(name) {
+    console.log(`Hello, ${name}!`);
+}
+
+// Variables
+let userName = "Bhuvanesh";
+const pi = 3.14;
+
+// Calling functions
+greetUser(userName);
+---------------------------------------------------
+📌 Remember: JavaScript programs are just files containing code that runs from top to bottom. 
+		No packages, no classes required (unless you want them)!
+----------------------------------------------------
+
+💡 Separators = Punctuation marks of JavaScript
+;  → End statement
+,  → Separate items
+.  → Access properties
+() → Call functions
+{} → Code blocks/objects
+=> → Arrow functions
+
+💡 Keywords = Reserved words with special meaning
+
+let, const, if, else, for, while, 
+function, return, class, try, catch
+
+
+⚡ Memory Tips --> Think of JavaScript as: "Files full of functions that run directly!"
+		💡 JavaScript = More flexible than Java (no forced structure)
+
+📊 Quick Comparison: Java vs JavaScript
+=================================================================================
+Aspect	      ||		Java	  	  ||		JavaScript	||
+=================================================================================
+Structure	Project → Package → Class → Method	Project → File → Function
+Entry Point	public static void main()		Top-level code runs directly
+Class Required?		Yes				No (optional in ES6)
+Separators	; . , () {} []				Same + => ... :
+Keywords	50+ reserved words			40+ reserved words
+=================================================================================
+-----------------------------------------------------------------------------
+📝 What is console.log()?
+
+🎯 Quick Answer
+console.log() is JavaScript's built-in printing/debugging tool that displays output in the browser's Console or terminal.
+console   → is a built-in object in JavaScript.
+.         → Dot operator (access property/method)
+log()     → Method that prints messages
+
+📝 Printing Multiple Items in One Line with console.log()
+
+🔍 Comparison Table
+		
+=================================================================================
+Method	      ||		Syntax	  	  ||		Best For	||
+=================================================================================
+,Comma			console.log(a, b, c)		    Quick debugging
++ Operator		"a: " + a + " b: " + b		    Simple strings
+Template Literals	`${a} ${b}`			    Variables + text
+=================================================================================
+
+###
+📋 JavaScript Primitive Types
+
+✅ Primitives (7 types)
+string
+number
+boolean
+null
+undefined
+symbol
+bigint
+=================================================================================
+Primitive	||	Example		  ||	       Can use methods?	        ||
+=================================================================================
+string			"hello"				✅ "hello".toUpperCase()
+number			42				✅ 42..toFixed(2)
+boolean			true				✅ true.toString()
+undefined		undefined			⚠️ No methods
+null			null				⚠️ No methods
+💡 rarely used
+symbol			Symbol()			✅ Limited methods
+bigint			123n				✅ 123n.toString()
+=================================================================================
+
+🧠 Your confusion 
+You’re noticing:
+
+✅ null is a primitive
+❌ But typeof null → "object"
+And you're thinking:
+
+“Wait… if typeof says object, doesn’t that mean non-primitive?”
+
+🔥 The Short Answer
+👉 typeof null ===>>> "object" is a historical bug in JavaScript
+👉 null is still a primitive, not an object
+
+Why?
+
+In early JavaScript (1995), values were internally stored as type tags
+Objects had a tag = 000
+null was represented as binary 000
+
+👉 So JS mistakenly classified null as object
+
+Important:
+
+This bug is kept for backward compatibility
+Fixing it would break old code on the internet
+
+❌ Don't Use BigInt When:
+// 1. Need decimals
+const price = 10.99;  // Use Number, not BigInt
+
+// 2. Performance-critical code (BigInt is slower)
+
+// 3. Interacting with APIs expecting Numbers
+
+🎯 Memory Trick
+"BigInt is your friend when numbers go beyond 16 digits, keeping precision intact when Number fails and fidgets!"
+Safe range: Up to 16 digits (9007 trillion) → Use Number
+Beyond that: Use BigInt with 'n' suffix
+
+📋 Quick Reference Card
+		
+=================================================================================
+Operation	   ||	   Syntax   		 ||	      Example	        ||
+=================================================================================
+Create			n suffix			var x = 123n;
+Create from string	BigInt()			BigInt("999")
+Convert to Number	Number()			Number(123n)
+Convert to BigInt	BigInt()			BigInt(123)
+Compare with Number	Compare after conversion	123n === BigInt(123)
+=================================================================================
+
+###
+
+📝 What is var in JavaScript?
+🎯 Quick Answer
+var is a KEYWORD used to declare variables in JavaScript.(since 1995 [JavaScript's birth])
+var → KEYWORD that TELLS JavaScript: 
+
+"Hey, I'm creating a new variable here!"   
+      ↓   
+Then you give it a NAME and optionally a VALUE
+
+🎯 Bottom Line
+var is just a keyword that says: "I'm about to create a variable!
+The actual data type comes from WHAT you store in the variable, not from var itself!
+---------------------------------------------------------------------
+📝 Why let Was Invented in ES6 (2015)
+🎯 The Short Answer
+let was invented to fix the problems and weird behaviors of var that confused developers for 20 years!
+🔍 The Problem with var (Before 2015)
+Problem 1: Can Redeclare Same Variable
+Problem 2: Variable Hoisting (Weird)
+Problem 3: No Block Scope(fuction scopped)
+Problem 4: Loop Issues
+
+✅ How let Fixes These Problems
+Fix 1: Proper Block Scope
+Fix 2: No Hoisting Weirdness
+Fix 3: No Redeclaration
+Fix 4: Loop Variables Work Correctly
+
+
+📈 The Evolution Timeline
+
+1995: var invented (only way to declare variables)
+     ↓
+1995-2015: Developers struggled with var's quirks
+     ↓
+2009: ES5 tries to fix with "use strict" (partial fix)
+     ↓
+2015: ES6 introduces let and const (real solution!)
+     ↓
+Today: let is the recommended way to declare variables
+
+
+💡 Why It Took 20 Years?
+
+==================================================================
+Reason		       ||	    Explanation  		 ||
+===================================================================
+Backward Compatibility		Can't break existing websites!
+Standards Process		ECMAScript updates take time
+Browser Support			Need all browsers to implement
+Community Feedback		Had to prove let was really needed
+===================================================================
+
+================================================================================
+                    JAVASCRIPT FUNDAMENTALS - COMPLETE REFERENCE
+================================================================================
+
+
+1. WHAT IS var IN JAVASCRIPT?
+================================================================================
+
+QUICK ANSWER:
+--------------------------------------------------------------------------------
+var is a KEYWORD used to declare variables in JavaScript (since 1995).
+
+var → KEYWORD that TELLS JavaScript:
+  "Hey, I'm creating a new variable here!"
+       ↓
+Then you give it a NAME and optionally a VALUE
+
+BOTTOM LINE:
+  var is just a keyword that says: "I'm about to create a variable!"
+  The actual data type comes from WHAT you store in the variable, not from
+  var itself!
+
+
+================================================================================
+2. WHY let WAS INVENTED IN ES6 (2015)
+================================================================================
+
+THE SHORT ANSWER:
+--------------------------------------------------------------------------------
+let was invented to fix the problems and weird behaviors of var that confused
+developers for 20 years!
+
+THE PROBLEM WITH var (Before 2015):
+--------------------------------------------------------------------------------
+Problem 1: Can Redeclare Same Variable
+Problem 2: Variable Hoisting (Weird)
+Problem 3: No Block Scope (Function Scoped)
+Problem 4: Loop Issues
+
+HOW let FIXES THESE PROBLEMS:
+--------------------------------------------------------------------------------
+Fix 1: Proper Block Scope
+Fix 2: No Hoisting Weirdness
+Fix 3: No Redeclaration
+Fix 4: Loop Variables Work Correctly
+
+EVOLUTION TIMELINE:
+--------------------------------------------------------------------------------
+1995: var invented (only way to declare variables)
+1995-2015: Developers struggled with var's quirks
+2009: ES5 tries to fix with "use strict" (partial fix)
+2015: ES6 introduces let and const (real solution!)
+Today: let is the recommended way to declare variables
+
+WHY IT TOOK 20 YEARS:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Reason                    │ Explanation                                    │
+├───────────────────────────┼────────────────────────────────────────────────┤
+│ Backward Compatibility    │ Can't break existing websites!                 │
+│ Standards Process         │ ECMAScript updates take time                   │
+│ Browser Support           │ Need all browsers to implement                 │
+│ Community Feedback        │ Had to prove let was really needed             │
+└───────────────────────────┴────────────────────────────────────────────────┘
+
+ES6 IMPACT SUMMARY:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Before ES6            │ After ES6              │ Improvement               │
+├───────────────────────┼────────────────────────┼───────────────────────────┤
+│ var only              │ let/const              │ ✅ Block scope            │
+│ Callback hell         │ Promises               │ ✅ Cleaner async          │
+│ Function expressions  │ Arrow functions        │ ✅ Shorter, lexical this  │
+│ String concatenation  │ Template literals      │ ✅ Readable strings       │
+│ No classes            │ class syntax           │ ✅ OOP patterns           │
+│ No modules            │ import/export          │ ✅ Code organization      │
+│ Manual loops          │ for...of               │ ✅ Simpler iteration      │
+└───────────────────────┴────────────────────────┴───────────────────────────┘
+
+
+================================================================================
+3. let - BEHAVIOUR NOTES
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Used to declare a block-scoped variable.
+
+SCOPE BEHAVIOUR:
+--------------------------------------------------------------------------------
+  • Block-scoped ({ })
+  • Accessible only within the block where declared
+  • Not accessible outside the block
+
+SYNTAX:
+let variableName = value;
+
+KEY CHARACTERISTICS:
+--------------------------------------------------------------------------------
+  • Can be reassigned
+  • Cannot be redeclared in the same scope
+  • Best used when value will change
+
+REASSIGNMENT: Allowed
+REDECLARATION: Not allowed in the same scope
+
+TEMPORAL DEAD ZONE (TDZ):
+--------------------------------------------------------------------------------
+  • Cannot access before declaration
+  • Causes ReferenceError
+
+USE CASES:
+--------------------------------------------------------------------------------
+  • Loop counters
+  • Conditional updates
+  • Dynamic data handling
+
+
+================================================================================
+4. const - BEHAVIOUR NOTES
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Used to declare a block-scoped constant variable.
+
+SCOPE BEHAVIOUR:
+--------------------------------------------------------------------------------
+  • Block-scoped ({ })
+  • Accessible only within declared block
+
+SYNTAX:
+const variableName = value;
+
+KEY CHARACTERISTICS:
+--------------------------------------------------------------------------------
+  • Must be initialized at declaration
+  • Cannot be reassigned
+  • Cannot be redeclared in same scope
+
+REASSIGNMENT: Not allowed (causes TypeError)
+
+USE CASES:
+--------------------------------------------------------------------------------
+  • Configuration values
+  • Fixed references
+  • Constants
+  • API endpoints
+  • Base URLs
+
+
+================================================================================
+5. ARITHMETIC OPERATORS
+================================================================================
+
+ Arithmetic operators are used in mathematical expressions in the same way that they are used in algebra. The following table lists the arithmetic operators:
+ Operator   		Result
+ + 		Addition (also unary plus)
+ – 		Subtraction (also unary minus)
+ * 		Multiplication
+ / 		Division
+ % 		Modulus- REMAINDER
+
+ -----------------------------------------
+ ++ 		Increment
+ += 		Addition assignment
+ –= 		Subtraction assignment
+ *= 		Multiplication assignment
+ /= 		Division assignment
+ %= 		Modulus assignment
+ –– 		Decrement
+
+ex :    str += temp+ " "  ( Loops/accumulation )
+
+ -----------------------------------------
+Relational Operators :
+
+ The relational operators determine the relationship that one operand has to the other. 
+Specifically, they determine equality and ordering. The relational operators are shown here:
+ Operator		Result
+ ==			Equal to
+ !=			Not equal to
+ >			Greater than
+ <			Less than
+ >=			Greater than or equal to
+ <=			Less than or equal to
+  
+ The outcome of these operations is a boolean value. The relational operators are most frequently used in the expressions that control the if statement and the various loop statements.
+
+Here, condition is a Boolean expression. If condition is true, then the statement is executed. 
+If condition is false, then the statement is bypassed
+
+
+The Bitwise Operators :
+
+JavaScript defines several bitwise operators that can be applied to the integer types: long, int, short, 
+char, and byte. These operators act upon the individual bits of their operands. They are 
+summarized in the following table:
+ Operator   	    Result
+ ~	     	Bitwise unary NOT
+ &		Bitwise AND
+ |		Bitwise OR
+ 
+ 
+
+=============================================================================
