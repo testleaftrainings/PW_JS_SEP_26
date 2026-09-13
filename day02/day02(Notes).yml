@@ -1,0 +1,995 @@
+📑 Agenda – Day 02 | String and Arrays in JavaScript  
+
+
+================================================================================
+                    JAVASCRIPT FUNDAMENTALS - COMPLETE REFERENCE
+================================================================================
+
+
+1. WHAT IS var IN JAVASCRIPT?
+================================================================================
+
+QUICK ANSWER:
+--------------------------------------------------------------------------------
+var is a KEYWORD used to declare variables in JavaScript (since 1995).
+
+var → KEYWORD that TELLS JavaScript:
+  "Hey, I'm creating a new variable here!"
+       ↓
+Then you give it a NAME and optionally a VALUE
+
+BOTTOM LINE:
+  var is just a keyword that says: "I'm about to create a variable!"
+  The actual data type comes from WHAT you store in the variable, not from
+  var itself!
+
+
+================================================================================
+2. WHY let WAS INVENTED IN ES6 (2015)
+================================================================================
+
+THE SHORT ANSWER:
+--------------------------------------------------------------------------------
+let was invented to fix the problems and weird behaviors of var that confused
+developers for 20 years!
+
+THE PROBLEM WITH var (Before 2015):
+--------------------------------------------------------------------------------
+Problem 1: Can Redeclare Same Variable
+Problem 2: Variable Hoisting (Weird)
+Problem 3: No Block Scope (Function Scoped)
+Problem 4: Loop Issues
+
+HOW let FIXES THESE PROBLEMS:
+--------------------------------------------------------------------------------
+Fix 1: Proper Block Scope
+Fix 2: No Hoisting Weirdness
+Fix 3: No Redeclaration
+Fix 4: Loop Variables Work Correctly
+
+EVOLUTION TIMELINE:
+--------------------------------------------------------------------------------
+1995: var invented (only way to declare variables)
+1995-2015: Developers struggled with var's quirks
+2009: ES5 tries to fix with "use strict" (partial fix)
+2015: ES6 introduces let and const (real solution!)
+Today: let is the recommended way to declare variables
+
+WHY IT TOOK 20 YEARS:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Reason                    │ Explanation                                    │
+├───────────────────────────┼────────────────────────────────────────────────┤
+│ Backward Compatibility    │ Can't break existing websites!                 │
+│ Standards Process         │ ECMAScript updates take time                   │
+│ Browser Support           │ Need all browsers to implement                 │
+│ Community Feedback        │ Had to prove let was really needed             │
+└───────────────────────────┴────────────────────────────────────────────────┘
+
+ES6 IMPACT SUMMARY:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Before ES6            │ After ES6              │ Improvement               │
+├───────────────────────┼────────────────────────┼───────────────────────────┤
+│ var only              │ let/const              │ ✅ Block scope            │
+│ Callback hell         │ Promises               │ ✅ Cleaner async          │
+│ Function expressions  │ Arrow functions        │ ✅ Shorter, lexical this  │
+│ String concatenation  │ Template literals      │ ✅ Readable strings       │
+│ No classes            │ class syntax           │ ✅ OOP patterns           │
+│ No modules            │ import/export          │ ✅ Code organization      │
+│ Manual loops          │ for...of               │ ✅ Simpler iteration      │
+└───────────────────────┴────────────────────────┴───────────────────────────┘
+
+
+================================================================================
+3. let - BEHAVIOUR NOTES
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Used to declare a block-scoped variable.
+
+SCOPE BEHAVIOUR:
+--------------------------------------------------------------------------------
+  • Block-scoped ({ })
+  • Accessible only within the block where declared
+  • Not accessible outside the block
+
+SYNTAX:
+let variableName = value;
+
+KEY CHARACTERISTICS:
+--------------------------------------------------------------------------------
+  • Can be reassigned
+  • Cannot be redeclared in the same scope
+  • Best used when value will change
+
+REASSIGNMENT: Allowed
+REDECLARATION: Not allowed in the same scope
+
+TEMPORAL DEAD ZONE (TDZ):
+--------------------------------------------------------------------------------
+  • Cannot access before declaration
+  • Causes ReferenceError
+
+USE CASES:
+--------------------------------------------------------------------------------
+  • Loop counters
+  • Conditional updates
+  • Dynamic data handling
+
+
+================================================================================
+4. const - BEHAVIOUR NOTES
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Used to declare a block-scoped constant variable.
+
+SCOPE BEHAVIOUR:
+--------------------------------------------------------------------------------
+  • Block-scoped ({ })
+  • Accessible only within declared block
+
+SYNTAX:
+const variableName = value;
+
+KEY CHARACTERISTICS:
+--------------------------------------------------------------------------------
+  • Must be initialized at declaration
+  • Cannot be reassigned
+  • Cannot be redeclared in same scope
+
+REASSIGNMENT: Not allowed (causes TypeError)
+
+USE CASES:
+--------------------------------------------------------------------------------
+  • Configuration values
+  • Fixed references
+  • Constants
+  • API endpoints
+  • Base URLs
+
+
+================================================================================
+5. ARITHMETIC OPERATORS
+================================================================================
+
+OPERATORS:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Operator    │ Result                                                       │
+├─────────────┼───────────────────────────────────────────────────────────────┤
+│ +           │ Addition (also unary plus)                                   │
+│ -           │ Subtraction (also unary minus)                               │
+│ *           │ Multiplication                                               │
+│ /           │ Division                                                     │
+│ %           │ Modulus - REMAINDER                                          │
+│ ++          │ Increment                                                    │
+│ --          │ Decrement                                                    │
+│ +=          │ Addition assignment                                          │
+│ -=          │ Subtraction assignment                                       │
+│ *=          │ Multiplication assignment                                    │
+│ /=          │ Division assignment                                          │
+│ %=          │ Modulus assignment                                           │
+└─────────────┴───────────────────────────────────────────────────────────────┘
+
+EXAMPLE:
+str += temp + " "  (Loops/accumulation)
+
+
+================================================================================
+6. RELATIONAL OPERATORS
+================================================================================
+
+The relational operators determine the relationship that one operand has to
+the other. Specifically, they determine equality and ordering.
+
+OPERATORS:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Operator    │ Result                                                       │
+├─────────────┼───────────────────────────────────────────────────────────────┤
+│ ==          │ Equal to                                                     │
+│ !=          │ Not equal to                                                 │
+│ >           │ Greater than                                                 │
+│ <           │ Less than                                                    │
+│ >=          │ Greater than or equal to                                     │
+│ <=          │ Less than or equal to                                        │
+└─────────────┴───────────────────────────────────────────────────────────────┘
+
+The outcome of these operations is a boolean value. The relational operators
+are most frequently used in the expressions that control the if statement and
+the various loop statements.
+
+
+================================================================================
+7. CONDITIONAL STATEMENTS - IF STATEMENT
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Used to evaluate logical conditions (true / false).
+
+EXECUTION BEHAVIOUR:
+--------------------------------------------------------------------------------
+  • Evaluates condition expression
+  • Executes block only if condition is true
+  • Supports relational and logical operators
+  • Multiple conditions supported
+  • Executes top-to-bottom
+
+FALSY VALUES IN JAVASCRIPT (Only 8 values are falsy):
+--------------------------------------------------------------------------------
+  false
+  0
+  -0
+  0n (BigInt zero)
+  "" (empty string)
+  null
+  undefined
+  NaN
+
+KEY CHARACTERISTICS:
+--------------------------------------------------------------------------------
+  • Can evaluate complex expressions
+  • Best suited for range-based conditions
+  • Uses >, <, >=, <=, &&, ||
+  • Stops after first true condition
+  • Flexible and dynamic
+
+USE CASES:
+--------------------------------------------------------------------------------
+  • Marks grading system
+  • Age validation
+  • Tax slab calculation
+  • Form validation logic
+
+
+================================================================================
+8. SWITCH STATEMENT
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Used for exact value matching.
+
+EXECUTION BEHAVIOUR:
+--------------------------------------------------------------------------------
+  • Evaluates expression once
+  • Compares using strict equality (===)
+  • Matches only exact values
+  • Executes matching case block
+  • Requires break to stop fall-through
+
+SYNTAX:
+switch (expression) {
+   case value1:
+      // executes if expression === value1
+      break;
+   case value2:
+      break;
+   default:
+      // executes if no match
+}
+
+
+================================================================================
+9. ITERATION STATEMENTS - FOR LOOP
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Used when the number of iterations is known or count-controlled.
+
+EXECUTION BEHAVIOUR:
+--------------------------------------------------------------------------------
+  • Executes in three parts: initialization → condition → increment/decrement
+  • Condition is checked before each iteration
+  • Stops when condition becomes false
+  • Suitable for counter-based repetition
+
+SYNTAX:
+for (initialization; condition; increment) {
+   // repeated block
+}
+
+FLOW ORDER:
+--------------------------------------------------------------------------------
+  1. Initialization runs once
+  2. Condition checked
+  3. Block executes if true
+  4. Increment runs
+  5. Condition rechecked
+
+KEY CHARACTERISTICS:
+--------------------------------------------------------------------------------
+  • Best for fixed iteration count
+  • Loop variable usually declared inside
+  • Clear and compact structure
+  • Risk of infinite loop if condition never becomes false
+
+USE CASES:
+--------------------------------------------------------------------------------
+  • Iterating arrays
+  • Number-based loops
+  • Index-controlled logic
+
+
+================================================================================
+10. WHILE LOOP
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Used when number of iterations is unknown and depends on condition.
+
+EXECUTION BEHAVIOUR:
+--------------------------------------------------------------------------------
+  • Condition checked first
+  • Executes only if condition is true
+  • May execute zero times
+
+SYNTAX:
+while (condition) {
+   // repeated block
+}
+
+FLOW ORDER:
+--------------------------------------------------------------------------------
+  1. Condition checked
+  2. If true → block executes
+  3. After execution → condition rechecked
+
+KEY CHARACTERISTICS:
+--------------------------------------------------------------------------------
+  • Entry-controlled loop
+  • Best for dynamic conditions
+  • Must manually control increment inside block
+  • High risk of infinite loop if update missing
+
+USE CASES:
+--------------------------------------------------------------------------------
+  • Waiting for user input
+  • Polling mechanism
+  • Conditional repetition
+
+
+================================================================================
+11. DO...WHILE LOOP
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Executes block at least once, regardless of condition.
+
+EXECUTION BEHAVIOUR:
+--------------------------------------------------------------------------------
+  • Block executes first
+  • Condition checked after execution
+  • Continues if condition is true
+
+SYNTAX:
+do {
+   // repeated block
+} while (condition);
+
+FLOW ORDER:
+--------------------------------------------------------------------------------
+  1. Block executes
+  2. Condition checked
+  3. If true → repeat
+
+KEY CHARACTERISTICS:
+--------------------------------------------------------------------------------
+  • Exit-controlled loop
+  • Guaranteed minimum one execution
+  • Useful for validation scenarios
+
+USE CASES:
+--------------------------------------------------------------------------------
+  • Menu-driven programs
+  • Input validation
+  • Retry mechanisms
+================================================================================
+12. STRING – Core Behaviour Notes
+================================================================================
+==================================================
+
+Definition
+
+A String is an immutable sequence of characters.
+
+Key Behaviour
+
+• Strings are primitive data types
+• Strings are immutable
+• String methods return a new string
+• Index starts from 0
+
+Example
+
+"Playwright"
+
+P = index 0
+t = index 9
+
+STRING CREATION – Core Behaviour Notes
+==================================================
+
+JavaScript provides 2 common ways to create a String
+
+1) Literal Way
+2) Instantiation (Constructor) Way
+
+==================================================
+1) Literal Way
+==================================================
+
+Definition
+
+Creates a string directly using quotes.
+
+Structure
+
+let str = "Playwright"
+
+Example
+
+let trainer = "Bhuvanesh"
+
+console.log(trainer)
+
+Output
+
+Bhuvanesh
+
+Execution Behaviour
+
+• Creates a primitive string
+• Lightweight
+• Faster
+• Most commonly used
+• Recommended approach
+
+Type Check
+
+let str = "Playwright"
+
+console.log(typeof str)
+
+Output
+
+string
+
+==================================================
+2) Instantiation Way
+==================================================
+
+Definition
+
+Creates a string object using the String constructor.
+
+Structure
+
+let str = new String("Playwright")
+
+Example
+
+let trainer = new String("Bhuvanesh")
+
+console.log(trainer)
+
+Output
+
+[String: 'Bhuvanesh']
+
+Execution Behaviour
+
+• Creates a String Object
+• Uses constructor
+• Occupies more memory
+• Rarely used in real projects
+
+Type Check
+
+let str = new String("Playwright")
+
+console.log(typeof str)
+
+Output
+
+object
+
+==================================================
+Real-Time Recommendation
+==================================================
+
+Always use:
+
+let str = "Playwright"
+
+Avoid:
+
+let str = new String("Playwright")
+
+unless you specifically need a String object.
+
+95%+ of Playwright, Selenium, Node.js, and
+TypeScript projects use String Literals.
+
+Helper Functions of String:
+==================================================
+1) slice() – Behaviour Notes
+==================================================
+
+Definition
+
+Used to extract a portion of a string.
+
+Structure
+
+string.slice(startIndex,endIndex)
+
+Execution Behaviour
+
+• Returns new string
+• End index excluded
+• Supports negative index
+• Original string unchanged
+
+Example
+
+let str="Playwright"
+
+str.slice(0,4)
+
+Output
+
+"Play"
+
+==================================================
+2) substring() – Behaviour Notes
+==================================================
+
+Definition
+
+Extracts part of a string.
+
+Structure
+
+string.substring(startIndex,endIndex)
+
+Execution Behaviour
+
+• End index excluded
+• Negative values treated as 0
+• Original string unchanged
+
+Example
+
+let str="Playwright"
+
+str.substring(0,4)
+
+Output
+
+"Play"
+
+Difference from slice()
+
+slice(-3) works
+substring(-3) treats -3 as 0
+
+==================================================
+3) charAt() – Behaviour Notes
+==================================================
+
+Definition
+
+Returns character at specified position.
+
+Structure
+
+string.charAt(index)
+
+Example
+
+let str="Playwright"
+
+str.charAt(0)
+
+Output
+
+"P"
+
+==================================================
+4) indexOf() – Behaviour Notes
+==================================================
+
+Definition
+
+Returns first occurrence position.
+
+Structure
+
+string.indexOf(value)
+
+Example
+
+let str="Playwright"
+
+str.indexOf("g")
+
+Output
+
+4
+
+If not found
+
+Returns -1
+
+==================================================
+5) lastIndexOf() – Behaviour Notes
+==================================================
+
+Definition
+
+Returns last occurrence position.
+
+Example
+
+let str="banana"
+
+str.lastIndexOf("a")
+
+Output
+
+5
+
+==================================================
+6) includes() – Behaviour Notes
+==================================================
+
+Definition
+
+Checks whether text exists.
+
+Structure
+
+string.includes(value)
+
+Example
+
+let str="Playwright"
+
+str.includes("wright")
+
+Output
+
+true
+
+==================================================
+7) startsWith() – Behaviour Notes
+==================================================
+
+Definition
+
+Checks beginning of string.
+
+Example
+
+let str="Playwright"
+
+str.startsWith("Play")
+
+Output
+
+true
+
+==================================================
+8) endsWith() – Behaviour Notes
+==================================================
+
+Definition
+
+Checks ending of string.
+
+Example
+
+let str="Playwright"
+
+str.endsWith("wright")
+
+Output
+
+true
+
+==================================================
+9) replace() – Behaviour Notes
+==================================================
+
+Definition
+
+Replaces first matching value.
+
+Structure
+
+string.replace(old,new)
+
+Example
+
+let str="I like Java"
+
+str.replace("Java","TypeScript")
+
+Output
+
+"I like TypeScript"
+
+==================================================
+10) replaceAll() – Behaviour Notes
+==================================================
+
+Definition
+
+Replaces all matching values.
+
+Example
+
+let str="Java Java Java"
+
+str.replaceAll("Java","TS")
+
+Output
+
+"TS TS TS"
+
+==================================================
+11) split() – Behaviour Notes
+==================================================
+
+Definition
+
+Converts string into array.
+
+Structure
+
+string.split(separator)
+
+Example
+
+let str="Chrome,Edge,Firefox"
+
+str.split(",")
+
+Output
+
+["Chrome","Edge","Firefox"]
+
+==================================================
+12) trim() – Behaviour Notes
+==================================================
+
+Definition
+
+Removes spaces from beginning and end.
+
+Example
+
+let str="   Playwright   "
+
+str.trim()
+
+Output
+
+"Playwright"
+
+==================================================
+13) toUpperCase() – Behaviour Notes
+==================================================
+
+Definition
+
+Converts all characters to uppercase.
+
+Example
+
+"playwright".toUpperCase()
+
+Output
+
+"PLAYWRIGHT"
+
+==================================================
+14) toLowerCase() – Behaviour Notes
+==================================================
+
+Definition
+
+Converts all characters to lowercase.
+
+Example
+
+"PLAYWRIGHT".toLowerCase()
+
+Output
+
+"playwright"
+
+==================================================
+15) concat() – Behaviour Notes
+==================================================
+
+Definition
+
+Combines multiple strings.
+
+Example
+
+let first="Play"
+let second="wright"
+
+first.concat(second)
+
+Output
+
+"Playwright"
+
+==================================================
+16) repeat() – Behaviour Notes
+==================================================
+
+Definition
+
+Repeats string specified number of times.
+
+Example
+
+"Hi".repeat(3)
+
+Output
+
+"HiHiHi"
+
+==================================================
+17) match() – Behaviour Notes
+==================================================
+
+Definition
+
+Used with Regular Expressions.
+
+Example
+
+let str="Testleaf123"
+
+str.match(/[0-9]+/)
+
+Output
+
+["123"]
+
+==================================================
+18) search() – Behaviour Notes
+==================================================
+
+Definition
+
+Searches using Regular Expression.
+
+Example
+
+let str="Playwright123"
+
+str.search(/[0-9]/)
+
+Output
+
+10
+
+==================================================
+19) padStart() – Behaviour Notes
+==================================================
+
+Definition
+
+Adds characters at beginning.
+
+Example
+
+"5".padStart(3,"0")
+
+Output
+
+"005"
+
+==================================================
+20) padEnd() – Behaviour Notes
+==================================================
+
+Definition
+
+Adds characters at end.
+
+Example
+
+"5".padEnd(3,"0")
+
+Output
+
+"500"
+
+================================================================================
+                    INTERVIEW QUESTIONS & ANSWERS
+================================================================================
+
+
+Q1: What is the difference between var, let, and const?
+--------------------------------------------------------------------------------
+ANSWER:
+  var: Function-scoped, can be redeclared, hoisted, available since ES5
+  let: Block-scoped, cannot be redeclared, TDZ, introduced in ES6
+  const: Block-scoped, cannot be reassigned or redeclared, must be initialized
+
+Q2: What is Temporal Dead Zone (TDZ)?
+--------------------------------------------------------------------------------
+ANSWER:
+  TDZ is the time between entering a block and the actual declaration of a
+  variable using let or const. Accessing the variable during TDZ throws a
+  ReferenceError.
+
+Q3: What is hoisting in JavaScript?
+--------------------------------------------------------------------------------
+ANSWER:
+  Hoisting is JavaScript's default behavior of moving declarations to the top
+  of their scope during compilation. var declarations are hoisted, but let
+  and const are not.
+
+Q4: Why should we use let instead of var?
+--------------------------------------------------------------------------------
+ANSWER:
+  let provides block scope, prevents accidental redeclaration, avoids hoisting
+  confusion, and makes code more predictable and maintainable.
+
+Q5: What are falsy values in JavaScript?
+--------------------------------------------------------------------------------
+ANSWER:
+  The 8 falsy values are: false, 0, -0, 0n (BigInt zero), "" (empty string),
+  null, undefined, NaN.
+
+Q6: What is the difference between == and ===?
+--------------------------------------------------------------------------------
+ANSWER:
+  == (Abstract Equality): Compares values after type coercion.
+  === (Strict Equality): Compares values and types without coercion.
+
+Q7: What is the difference between for, while, and do...while loops?
+--------------------------------------------------------------------------------
+ANSWER:
+  for: Used when iteration count is known.
+  while: Entry-controlled, condition checked before execution.
+  do...while: Exit-controlled, executes at least once.
+
+Q8: What is the difference between slice() and substring()?
+--------------------------------------------------------------------------------
+ANSWER:
+  slice(): Accepts negative indices, end index excluded.
+  substring(): Treats negative values as 0, end index excluded.
+
+Q9: What is the difference between String Literal and String Object?
+--------------------------------------------------------------------------------
+ANSWER:
+  Literal: let str = "Hello" → Creates primitive string (recommended).
+  Object: let str = new String("Hello") → Creates String object (avoid).
+
+Q10: What is the purpose of break in switch statement?
+--------------------------------------------------------------------------------
+ANSWER:
+  break prevents fall-through behavior. Without break, execution continues to
+  the next case regardless of matching.
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
