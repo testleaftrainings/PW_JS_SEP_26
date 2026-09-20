@@ -1,0 +1,947 @@
+================================================================================
+                    DAY 04 – INTRODUCTION TO PLAYWRIGHT AND LOCATORS
+================================================================================
+
+
+================================================================================
+                    WHY ASYNCHRONOUS PROGRAMMING?
+================================================================================s
+
+Asynchronous programming is a programming technique where long-running
+operations are executed without blocking the main execution thread. The program
+can continue performing other tasks while waiting for the operation to complete,
+improving responsiveness and performance.
+
+
+================================================================================
+                    WHAT IS A PROMISE?
+================================================================================
+
+A Promise is a JavaScript object that represents the future result of an
+asynchronous operation.
+
+Think of it this way:
+
+Current Status:  "I have started the work."
+Future Status:   "I will either complete it successfully or fail."
+
+A Promise is JavaScript's way of saying:
+  "I don't have the result right now. I'll give it to you later."
+
+PROMISE STATES:
+--------------------------------------------------------------------------------
+A Promise can be in only one of three states:
+
+1. PENDING:
+  Work is still running.
+  Examples: Downloading file..., Calling API..., Loading webpage...
+
+2. FULFILLED (RESOLVED):
+  Work completed successfully.
+  Examples: API response received, File downloaded, Page loaded.
+
+3. REJECTED:
+  Work failed.
+  Examples: Network error, Server error, File not found.
+
+
+================================================================================
+                    WHAT IS async?
+================================================================================
+
+async is a keyword used to declare an asynchronous function.
+
+An async function always returns a Promise, regardless of what value you return.
+
+Which Functions Can Be Async?
+  1) Function Declaration
+  2) Function Expression
+  3) Arrow Function
+
+Note: Playwright page methods are typically async.
+
+
+================================================================================
+                    WHAT IS await?
+================================================================================
+
+await is used to pause the execution of an async function until a Promise is
+resolved or rejected.
+
+Without await, JavaScript continues execution immediately.
+With await, JavaScript waits for the result before moving to the next line.
+
+WHY DO WE NEED ASYNC/AWAIT?
+--------------------------------------------------------------------------------
+Consider the following operations:
+  • API calls
+  • Database calls
+  • File reading
+  • Browser automation (Playwright)
+  • Network requests
+
+These operations take time to complete. Instead of blocking the entire
+application, JavaScript performs them asynchronously.
+
+Async/Await provides a cleaner way to handle such operations compared to .then()
+chains.
+
+WHICH FUNCTIONS CAN USE await?
+--------------------------------------------------------------------------------
+Rule: await can only be used inside:
+  1) Async Functions
+  2) Top-level modules (modern JavaScript environments)
+
+
+================================================================================
+              WHAT REALLY HAPPENS WHEN YOU WRITE: await page.click('#login')
+================================================================================
+
+Let's take a real Playwright line:
+
+await page.click('#login');
+
+STEP-BY-STEP BREAKDOWN:
+--------------------------------------------------------------------------------
+
+STEP 1: Playwright returns a Promise
+  page.click() immediately returns a Promise.
+
+STEP 2: await sees a Promise
+  await tells JavaScript:
+    "Pause this function here and continue after this Promise finishes."
+
+  IMPORTANT:
+    ✓ Only the current function pauses
+    ✓ The JS engine keeps running other work (event loop continues)
+    ✓ Other tests, timers, or callbacks can still execute
+
+STEP 3: Callback is registered (hidden from you)
+  Internally:
+  page.click().then(() => {
+    // resume test execution here
+  });
+
+STEP 4: Browser action happens
+  Playwright:
+    • Sends command to browser via WebSocket
+    • Waits for action + auto-waits (visibility, stability, etc.)
+    • This happens OUTSIDE the JS call stack
+
+  Playwright's auto-waiting ensures:
+    ✓ Element is attached to DOM
+    ✓ Element is visible
+    ✓ Element is stable (not moving)
+    ✓ Element is clickable (not covered)
+
+STEP 5: Promise is fulfilled
+  Once the click completes:
+    • Promise status changes from Pending → Fulfilled
+    • Resume callback is placed in Microtask Queue
+
+STEP 6: Event loop resumes your test
+  When call stack is empty:
+    • Microtask queue is processed
+    • Your test function continues
+    • console.log('After click'); executes
+
+KEY INSIGHTS (INTERVIEW READY):
+--------------------------------------------------------------------------------
+1. await does NOT block the entire JavaScript engine
+   • Only the current async function pauses
+   • Other code (other tests, timers) can still run
+   • This is NOT like Thread.sleep() in Java
+
+2. Playwright's auto-waiting happens OUTSIDE the JS call stack
+   • Visibility checks, stability checks happen in browser
+   • JS engine is free to do other work
+   • This is why Playwright tests are efficient
+
+3. Promise callbacks go to Microtask Queue (higher priority)
+   • Microtask Queue is processed BEFORE Task Queue
+   • Higher priority than setTimeout callbacks
+
+4. Playwright actions are NOT synchronous
+   • Without await, test would continue immediately
+   • Click may not have happened yet
+   • This would cause flaky tests
+
+COMMON INTERVIEW QUESTIONS:
+--------------------------------------------------------------------------------
+Q: What happens if I remove await?
+A: Without await, the test continues immediately without waiting for the click
+   to complete. This leads to race conditions and flaky tests.
+
+   await page.click('#login');  // ✓ Waits for click
+   page.click('#login');         // ✗ Continues immediately
+
+Q: Is await same as Thread.sleep()?
+A: NO. Thread.sleep() blocks the entire thread. await only pauses the current
+   async function while allowing other JavaScript code to run.
+
+Q: How does Playwright know when to resume?
+A: Through the Promise's then() callback. When the browser action completes,
+   the Promise resolves and the callback is added to Microtask Queue.
+   The event loop then executes it when call stack is empty.
+
+Q: Why doesn't Playwright need explicit waitForElementVisible()?
+A: Playwright's auto-waiting is built into every action. Before clicking,
+   it automatically waits for:
+   • Element to be attached
+   • Element to be visible
+   • Element to be stable
+   • Element to be clickable
+
+
+================================================================================
+                    IN-PROCESS vs OUT-OF-PROCESS AUTOMATION
+================================================================================
+
+1. IN-PROCESS AUTOMATION:
+--------------------------------------------------------------------------------
+What it is: Automation code runs inside the browser process. Test code and
+application code share the same runtime.
+
+Example:
+Application → Browser Process → Cypress Test Code
+
+Why we need it: Direct access to DOM, Fast communication.
+
+Problem it solves: Eliminates external driver communication.
+
+Tool Example: Cypress
+
+2. OUT-OF-PROCESS AUTOMATION:
+--------------------------------------------------------------------------------
+What it is: Test code runs outside the browser. Commands are sent to the
+browser through an external layer.
+
+Example:
+Test Script → WebDriver → Browser Driver → Browser
+
+Why we need it: Process isolation, Browser independence.
+
+Problem it solves: Standardized browser automation.
+
+Tool Example: Selenium
+
+WHERE DOES PLAYWRIGHT FIT?
+--------------------------------------------------------------------------------
+Playwright is Neither Pure In-Process Nor Pure Out-of-Process
+
+Architecture:
+Playwright Test (Node.js Process) → Playwright API → WebSocket/CDP/Browser
+Protocol → Browser Process → Renderer Process
+
+Notice:
+  • Test code runs outside the browser ✅
+  • No WebDriver/ChromeDriver ❌
+  • Direct browser protocol communication ✅
+
+Why People Call Playwright "Hybrid":
+  From Out-of-Process:
+    • Process Isolation
+    • Separate Test Runtime
+    • Better Stability (Like Selenium)
+
+  From In-Process:
+    • Fast Communication
+    • Real-time Events
+    • Network Interception
+    • Tracing
+    • Auto Waiting (Like Cypress)
+
+
+================================================================================
+                    W3C vs WEBSOCKET
+================================================================================
+
+W3C (Stateless API):
+  A stateless API does not store client information between requests.
+  Example: Selenium (HTTP Request per command)
+
+WebSocket (Stateful API):
+  A stateful API remembers information about the client between requests.
+  Example: Playwright (Persistent WebSocket connection)
+
+Playwright (WebSocket):
+Test Script → Playwright → WebSocket Connection (Always Open) → Browser
+
+
+================================================================================
+                    BROWSER ARCHITECTURE & PLAYWRIGHT
+================================================================================
+
+WHY PLAYWRIGHT IS FAST?
+--------------------------------------------------------------------------------
+
+TRADITIONAL SELENIUM ARCHITECTURE:
+Test Script → WebDriver API → Browser Driver → Browser
+
+PROBLEM:
+  • Multiple communication layers
+  • Every command becomes an HTTP request
+  • More latency
+
+PLAYWRIGHT ARCHITECTURE:
+Test Script → Playwright → Browser Native Protocol (WebSocket/CDP) → Browser Internals
+
+BENEFIT:
+  • Faster execution
+  • Real-time communication
+  • Direct access to browser components
+
+
+BROWSER COMPONENTS AND PLAYWRIGHT MAPPING:
+--------------------------------------------------------------------------------
+
+1. RENDER PROCESS:
+  Responsible for: Rendering HTML/CSS, Executing JavaScript, Managing DOM
+  Related Playwright: DOM, CSS Selectors, Locator, getByText()
+
+2. BROWSER PROCESS:
+  Responsible for: Permissions, Security, Geolocation, User Input
+  Related Playwright: Mouse Actions, Keyboard Actions, Permissions
+
+3. NETWORK PROCESS:
+  Responsible for: HTTP Requests/Responses, WebSockets
+  Related Playwright: page.goto(), API Testing, route()
+
+4. SERVICE WORKER PROCESS:
+  Responsible for: Caching, Offline Mode, Push Notifications
+  Related Playwright: Offline Testing, PWA Validation
+
+ONE-LINE TAKEAWAY:
+  "Every Playwright action ultimately interacts with one of four browser
+  components: Render Process, Browser Process, Network Process, or Service
+  Worker Process."
+
+
+================================================================================
+                    PLAYWRIGHT CONFIGURATION & COMMANDS
+================================================================================
+
+CONFIGURATION FILE EXPLANATION:
+--------------------------------------------------------------------------------
+STEP 1: Set headless: false
+  export default defineConfig({
+    use: { headless: false }
+  });
+  Why: Helps visualize test execution during development
+
+STEP 2: Comment Firefox and WebKit projects
+  projects: [
+    { name: 'chromium', use: { ... } },
+    // { name: 'firefox', use: { ... } },
+    // { name: 'webkit', use: { ... } },
+  ];
+  Why: Faster execution during development (run only Chromium)
+
+STEP 3: Set workers: 1
+  export default defineConfig({
+    workers: 1
+  });
+  Why: Easier debugging (no parallel execution conflicts)
+
+
+COMMONLY USED COMMANDS:
+--------------------------------------------------------------------------------
+npx playwright test                      Run all tests
+npx playwright test filename.spec.ts     Run specific test file
+npx playwright test --grep "login"       Run tests matching pattern
+npx playwright test --project=chromium   Run tests on specific browser
+npx playwright test --headed             Run with UI visible
+npx playwright test --debug              Run in debug mode
+npx playwright show-report               Open test report in browser
+npx playwright codegen                   Open test recorder
+
+DEFAULT MODE: headless = true (runs without UI by default)
+
+
+MAXIMIZE SCREEN SIZE:
+--------------------------------------------------------------------------------
+CHROMIUM:
+{
+  name: 'chromium',
+  use: {
+    channel: 'msedge',
+    viewport: null,  // Disable the default 1280x720
+    launchOptions: { args: ['--start-maximized'] },
+  },
+}
+
+FIREFOX:
+{
+  name: 'firefox',
+  use: {
+    browserName: "firefox",
+    viewport: { width: 1920, height: 1080 },
+    launchOptions: { args: ['--start-maximized'] },
+  },
+}
+
+
+FREQUENTLY ASKED QUESTIONS:
+--------------------------------------------------------------------------------
+
+Q1: Does Playwright use my installed browser?
+A: NO (by default). Playwright downloads its own browser binaries.
+   YES, with channel option: chromium.launch({ channel: 'chrome' })
+
+Q2: Why .spec.ts extension is mandatory?
+A: It is NOT mandatory. It's the default naming convention. Can be customized.
+
+Q3: What are Test Count and Workers Count?
+A: Test Count = Number of test cases discovered.
+   Workers Count = Number of parallel worker processes.
+
+
+================================================================================
+                    WHAT IS A PAGE FIXTURE?
+================================================================================
+
+In Playwright, a page fixture is a predefined setup that provides a fresh
+browser page for each test. It ensures that tests run in isolation, preventing
+interference from previous tests. The page fixture is part of Playwright's test
+runner and is automatically available in test functions.
+
+
+================================================================================
+                    DOM STRUCTURE
+================================================================================
+
+Document Object Model (DOM) is a programming interface for web documents. It
+represents the page so that programs can change the document structure, style,
+and content. The DOM represents the document as nodes and objects; that way,
+programming languages can interact with the page.
+
+<html>
+  <head>
+    <title>Testleaf Page</title>
+  </head>
+  <body>
+    <div>
+      <h1>Welcome to Testleaf</h1>
+      <p>This is a sample paragraph.</p>
+
+      <!-- Label and Textbox -->
+      <label for="username">Enter Name:</label>
+      <input type="text" id="username" name="username">
+    </div>
+  </body>
+</html>
+
+
+================================================================================
+                    PLAYWRIGHT LOCATOR - DEEP DIVE
+================================================================================
+
+METHOD SIGNATURE
+================================================================================
+
+page.locator(selector): Locator
+
+RETURN TYPE: Locator (NOT Element, HTMLElement, ElementHandle, or Array)
+
+It always returns a Locator object.
+
+
+WHAT IS A LOCATOR?
+================================================================================
+
+A Locator is a smart object that knows:
+  • How to find an element
+  • When to find an element
+  • How to retry finding an element
+
+EXAMPLE:
+--------------------------------------------------------------------------------
+const username = page.locator('#username');
+
+At this point:
+  • No DOM lookup happened
+  • No element was found yet
+  • Only a Locator object is created
+
+
+LAZY EVALUATION
+================================================================================
+
+const username = page.locator('#username');
+
+Playwright stores: "Whenever needed, find element matching #username"
+
+Actual lookup happens here:
+await username.fill('admin');
+
+
+SCENARIO 1: EXACTLY ONE ELEMENT MATCHES
+================================================================================
+
+DOM:
+<input id="username">
+
+CODE:
+--------------------------------------------------------------------------------
+const username = page.locator('#username');
+await username.fill('admin');
+
+PLAYWRIGHT FLOW:
+--------------------------------------------------------------------------------
+Locator → Find matching elements → Found 1 element → Perform action
+
+RESULT: SUCCESS
+
+
+SCENARIO 2: MULTIPLE ELEMENTS MATCH
+================================================================================
+
+DOM:
+<button>Login</button>
+<button>Login</button>
+
+CODE:
+--------------------------------------------------------------------------------
+await page.locator('button').click();
+
+PLAYWRIGHT FLOW:
+--------------------------------------------------------------------------------
+Locator → Find matching elements → Found 2 elements → click() requires ONE element
+
+RESULT: STRICT MODE VIOLATION
+
+ERROR:
+locator('button') resolved to 2 elements
+
+
+SCENARIO 3: NO ELEMENTS MATCH
+================================================================================
+
+DOM: (No matching element)
+
+CODE:
+--------------------------------------------------------------------------------
+await page.locator('#username').fill('admin');
+
+PLAYWRIGHT FLOW:
+--------------------------------------------------------------------------------
+Auto Wait → Retry → Retry → Retry → Timeout
+
+RESULT: Timeout Error
+
+
+BUT WAIT... LOCATOR CAN REPRESENT MULTIPLE ELEMENTS!
+================================================================================
+
+EXAMPLE:
+const buttons = page.locator('button');
+
+DOM:
+<button>Save</button>
+<button>Delete</button>
+<button>Cancel</button>
+
+Locator contains: 3 matching elements
+
+NO ERROR YET! Because const buttons = page.locator('button'); is only creating
+a Locator.
+
+
+WHEN DOES ERROR HAPPEN?
+================================================================================
+
+When you perform an action requiring uniqueness.
+
+EXAMPLE:
+await buttons.click();
+
+Now: 3 buttons found → Error: Strict Mode Violation
+
+
+HOW TO HANDLE MULTIPLE ELEMENTS?
+================================================================================
+
+METHOD           | EXAMPLE                                                    |
+-----------------|------------------------------------------------------------|
+first()          | await page.locator('button').first().click();              |
+last()           | await page.locator('button').last().click();               |
+nth()            | await page.locator('button').nth(1).click();               |
+all()            | const buttons = await page.locator('button').all();        |
+                 | Returns: Locator[]                                         |
+count()          | const count = await page.locator('button').count();        |
+                 | Returns: number (e.g., 3)                                  |
+
+
+COMMON INTERVIEW QUESTIONS
+================================================================================
+
+Q: Does page.locator() return the element?
+--------------------------------------------------------------------------------
+A: NO. page.locator() returns a Locator, which is a query object, not the
+   actual element.
+
+Q: Does locator immediately find the element?
+--------------------------------------------------------------------------------
+A: NO. Locator uses Lazy Evaluation. The actual DOM lookup happens only when
+   an action or assertion is executed.
+
+Q: What if locator matches multiple elements?
+--------------------------------------------------------------------------------
+A: Locator creation succeeds. If an action like click() or fill() is performed,
+   Playwright throws a Strict Mode Violation because the action requires a
+   single unique element. To work with multiple matches, use first(), last(),
+   nth(), count(), or all().
+
+
+MENTAL MODEL
+================================================================================
+
+const locator = page.locator('button');
+
+Think of it as:
+
+  "I know HOW to find the button, but I won't search for it until you ask me
+   to do something."
+
+
+QUICK REFERENCE TABLE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Scenario                    │ Behavior                                       │
+├─────────────────────────────┼────────────────────────────────────────────────┤
+│ Creating Locator            │ No DOM lookup (Lazy Evaluation)               │
+│ 1 element matches           │ Action succeeds                                │
+│ Multiple elements match     │ Strict Mode Violation on action               │
+│ No elements match           │ Auto-wait + Retry → Timeout                   │
+│ .first() / .last() / .nth() │ Returns new Locator for specific element      │
+│ .all()                      │ Returns array of Locator objects              │
+│ .count()                    │ Returns number of matching elements           │
+└─────────────────────────────┴────────────────────────────────────────────────┘
+
+
+ONE-LINE TAKEAWAY (INTERVIEW READY)
+================================================================================
+
+"page.locator() returns a Locator object, not an element. It uses lazy
+evaluation, meaning actual DOM lookup happens only when an action or assertion
+is performed. If multiple elements match, actions requiring uniqueness throw
+a Strict Mode Violation."
+
+================================================================================
+                             
+================================================================================
+                    CSS SELECTORS IN PLAYWRIGHT
+================================================================================
+
+WHAT IS A CSS SELECTOR?
+================================================================================
+
+CSS Selectors are patterns used to locate HTML elements based on:
+
+  • Tag Name
+  • ID
+  • Class
+  • Attribute
+  • Attribute Value
+  • Partial Attribute Value
+
+In Playwright:
+
+  await page.locator('css-selector');
+
+Example:
+  await page.locator('#username');
+
+
+UNDERSTANDING THE BUILDING BLOCKS
+================================================================================
+
+Consider the element:
+
+<input id="username"
+       class="input-field"
+       name="userName"
+       type="text"
+       placeholder="Enter Username">
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Part                    │ Value                                             │
+├─────────────────────────┼───────────────────────────────────────────────────┤
+│ Tag Name                │ input                                             │
+│ ID Attribute            │ id                                                │
+│ ID Value                │ username                                          │
+│ Class Attribute         │ class                                             │
+│ Class Value             │ input-field                                       │
+│ Name Attribute          │ name                                              │
+│ Name Value              │ userName                                          │
+│ Type Attribute          │ type                                              │
+│ Type Value              │ text                                              │
+└─────────────────────────┴───────────────────────────────────────────────────┘
+
+
+================================================================================
+                    1. ID SELECTOR (#)
+================================================================================
+
+SYNTAX:
+--------------------------------------------------------------------------------
+  #attributeValue
+  OR
+  tagName#attributeValue
+
+BREAKDOWN - input#username:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Part                    │ Meaning                                          │
+├─────────────────────────┼───────────────────────────────────────────────────┤
+│ input                   │ Tag Name                                         │
+│ #                       │ Represents ID                                    │
+│ username                │ ID Value                                         │
+└─────────────────────────┴───────────────────────────────────────────────────┘
+
+HTML:
+  <input id="username">
+
+PLAYWRIGHT:
+  await page.locator('#username');
+  await page.locator('input#username');
+
+
+================================================================================
+                    2. CLASS SELECTOR (.)
+================================================================================
+
+SYNTAX:
+--------------------------------------------------------------------------------
+  .classValue
+  OR
+  tagName.classValue
+
+BREAKDOWN - button.btn-primary:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Part                    │ Meaning                                          │
+├─────────────────────────┼───────────────────────────────────────────────────┤
+│ button                  │ Tag Name                                         │
+│ .                       │ Represents Class                                 │
+│ btn-primary             │ Class Value                                      │
+└─────────────────────────┴───────────────────────────────────────────────────┘
+
+HTML:
+  <button class="btn-primary">
+
+PLAYWRIGHT:
+  await page.locator('.btn-primary');
+  await page.locator('button.btn-primary');
+
+
+================================================================================
+                    3. ATTRIBUTE SELECTOR ([])
+================================================================================
+
+SYNTAX:
+--------------------------------------------------------------------------------
+  tagName[attribute='value']
+
+BREAKDOWN - input[name='username']:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Part                    │ Meaning                                          │
+├─────────────────────────┼───────────────────────────────────────────────────┤
+│ input                   │ Tag Name                                         │
+│ name                    │ Attribute Name                                   │
+│ username                │ Attribute Value                                  │
+└─────────────────────────┴───────────────────────────────────────────────────┘
+
+HTML:
+  <input name="username">
+
+PLAYWRIGHT:
+  await page.locator("input[name='username']");
+
+
+================================================================================
+                    4. COMBINING MULTIPLE ATTRIBUTES
+================================================================================
+
+When one attribute is not enough to uniquely identify an element.
+
+SYNTAX:
+--------------------------------------------------------------------------------
+  tagName[attribute1='value1'][attribute2='value2']
+
+EXAMPLE - input[name='username'][type='text']:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Part                    │ Meaning                                          │
+├─────────────────────────┼───────────────────────────────────────────────────┤
+│ input                   │ Tag Name                                         │
+│ name                    │ Attribute 1                                      │
+│ username                │ Attribute 1 Value                                │
+│ type                    │ Attribute 2                                      │
+│ text                    │ Attribute 2 Value                                │
+└─────────────────────────┴───────────────────────────────────────────────────┘
+
+PLAYWRIGHT:
+  await page.locator("input[name='username'][type='text']");
+
+
+================================================================================
+                    COMBINING ID AND ATTRIBUTE
+================================================================================
+
+SYNTAX:
+--------------------------------------------------------------------------------
+  tagName#idValue[attribute='value']
+
+EXAMPLE - a#crmLink[href='/crmsfa/control/main']:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Part                    │ Meaning                                          │
+├─────────────────────────┼───────────────────────────────────────────────────┤
+│ a                       │ Tag Name                                         │
+│ #crmLink                │ ID Value                                         │
+│ href                    │ Attribute                                        │
+│ /crmsfa/control/main    │ Attribute Value                                  │
+└─────────────────────────┴───────────────────────────────────────────────────┘
+
+PLAYWRIGHT:
+  await page.locator("a#crmLink[href='/crmsfa/control/main']");
+
+
+================================================================================
+                    5. SUBSTRING MATCHING
+================================================================================
+
+Used when values are dynamic.
+
+Example:
+  <input id="user_12345">
+
+Tomorrow:
+  <input id="user_67890">
+
+Exact ID matching will fail.
+
+A) STARTS WITH (^=)
+--------------------------------------------------------------------------------
+SYNTAX:
+  tagName[attribute^='prefix']
+
+EXAMPLE - input[id^='user_']:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Part                    │ Meaning                                          │
+├─────────────────────────┼───────────────────────────────────────────────────┤
+│ input                   │ Tag Name                                         │
+│ id                      │ Attribute                                        │
+│ ^=                      │ Starts With                                      │
+│ user_                   │ Prefix                                           │
+└─────────────────────────┴───────────────────────────────────────────────────┘
+
+Matches:
+  <input id="user_12345">
+  <input id="user_56789">
+
+PLAYWRIGHT:
+  await page.locator("input[id^='user_']");
+
+
+B) ENDS WITH ($=)
+--------------------------------------------------------------------------------
+SYNTAX:
+  tagName[attribute$='suffix']
+
+EXAMPLE - input[id$='12345']:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Part                    │ Meaning                                          │
+├─────────────────────────┼───────────────────────────────────────────────────┤
+│ input                   │ Tag Name                                         │
+│ id                      │ Attribute                                        │
+│ $=                      │ Ends With                                        │
+│ 12345                   │ Suffix                                           │
+└─────────────────────────┴───────────────────────────────────────────────────┘
+
+Matches:
+  <input id="user_12345">
+
+PLAYWRIGHT:
+  await page.locator("input[id$='12345']");
+
+
+C) CONTAINS (*=)
+--------------------------------------------------------------------------------
+SYNTAX:
+  tagName[attribute*='substring']
+
+EXAMPLE - input[id*='user']:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Part                    │ Meaning                                          │
+├─────────────────────────┼───────────────────────────────────────────────────┤
+│ input                   │ Tag Name                                         │
+│ id                      │ Attribute                                        │
+│ *=                      │ Contains                                         │
+│ user                    │ Substring                                        │
+└─────────────────────────┴───────────────────────────────────────────────────┘
+
+Matches:
+  <input id="user_12345">
+  <input id="admin_user">
+
+PLAYWRIGHT:
+  await page.locator("input[id*='user']");
+
+
+================================================================================
+                    QUICK REFERENCE TABLE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Selector Type          │ Syntax                          │ Example         │
+├────────────────────────┼─────────────────────────────────┼─────────────────┤
+│ ID                     │ #id                             │ #username       │
+│ ID + Tag               │ tag#id                          │ input#username  │
+│ Class                  │ .class                          │ .btn-primary    │
+│ Class + Tag            │ tag.class                       │ button.btn-     │
+│                        │                                 │ primary         │
+│ Attribute              │ [attr='value']                  │ [name='user']   │
+│ Attribute + Tag        │ tag[attr='value']               │ input[name='    │
+│                        │                                 │ user']          │
+│ Multiple Attributes    │ [attr1='v1'][attr2='v2']        │ [type='text']   │
+│                        │                                 │ [name='user']   │
+│ ID + Attribute         │ #id[attr='value']               │ #login[type='   │
+│                        │                                 │ submit']        │
+│ Starts With            │ [attr^='prefix']                │ [id^='user_']   │
+│ Ends With              │ [attr$='suffix']                │ [id$='12345']   │
+│ Contains               │ [attr*='substring']             │ [id*='user']    │
+└────────────────────────┴─────────────────────────────────┴─────────────────┘
+
+
+
+
+================================================================================
+                    QUICK REVISION
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concept                    │ Summary                                        │
+├────────────────────────────┼────────────────────────────────────────────────┤
+│ Promise                    │ Future result of async operation              │
+│ Pending                    │ Work is still running                         │
+│ Fulfilled                  │ Work completed successfully                   │
+│ Rejected                   │ Work failed                                   │
+│ async                      │ Declares async function (returns Promise)     │
+│ await                      │ Pauses execution until Promise resolves       │
+│ In-Process Automation      │ Code runs inside browser (Cypress)           │
+│ Out-of-Process Automation  │ Code runs outside browser (Selenium)          │
+│ Playwright Architecture    │ Hybrid (isolation + speed)                   │
+│ W3C Protocol               │ Stateless (HTTP per command)                 │
+│ WebSocket                  │ Stateful (persistent connection)             │
+│ page fixture               │ Fresh browser page per test                  │
+│ DOM                        │ Programming interface for web documents      │
+│ CSS Selectors              │ #id, .class, [attribute], parent child        │
+└────────────────────────────┴────────────────────────────────────────────────┘
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
