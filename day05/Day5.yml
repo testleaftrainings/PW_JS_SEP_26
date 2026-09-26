@@ -1,0 +1,120 @@
+Week3.Day1
+
+-> Recap
+-> DOM Structure
+-> Cascading Style sheets (CSS)
+-> Break
+-> Breakout
+-> XPath
+-> Breakout
+-> Dropdown
+
+
+
+DOM -->Document Object Model /developer /Html design -->
+find information elements
+
+Ways to Open DOM:
+1. right click on the application and click on inspect
+2. press f12 or fn + f12
+3. press ctrl + shift + i => browser click on 3 idot -> more tools -> developer tool
+
+
+Locators
+1. CSS Locators
+2. XPath
+3. Playwright inbuilt locators
+
+
+CSS : Cascading Style sheets
+id attribute
+1. #attributeValue -> #username
+2. [id='username']
+3. tagname[attributeName='attributeValue'] -> input[id='username']
+
+name attribute:
+1. [name='USERNAME']
+2. tagname[attributeName='attributeValue'] -> input[name='USERNAME']
+
+class attribute:
+1. .attributeValue -> .decorativeSubmit
+2. [class='decorativeSubmit']
+3. tagname[attributeName='attributeValue'] -> input[class='decorativeSubmit']
+
+.input r4 wide mb16 mt8 username -> it wll not work
+.input.r4.wide.mb16.mt8.username -> it will work
+
+.nav-input nav-progressive-attribute
+.nav-input.nav-progressive-attribute
+
+Text:
+text value: link->  a tag
+text='textvalue' -> `text='CRM/SFA'`
+
+
+(.inputLogin).first() -> username
+(.inputLogin).last()-> password
+
+(.username)-> 5 matches - need go for 3rd Open
+(.username).nth(2)
+multiple match :
+
+.first() -> first match with DOM(0 index )
+.last() -> Last match with DOM
+.nth() -> start from 1 index)-> from 2nd match
+
+Index value start from '0'
+
+
+classRoom:
+load url : https://login.salesforce.com/?locale=in
+username : dilipkumar.rajendran@testleaf.com
+password : TestLeaf@2025
+click on login button
+
+
+{
+      name: 'chromium',
+  
+      use: { channel:'chrome'
+      ,
+       viewport:null,
+      launchOptions:{
+         args: 
+      ['--start-maximized'],}
+      },
+      
+    }
+
+
+
+
+
+Dropdown:
+1. select tag dropdown
+<select>
+<option>
+
+await page.selectOption()
+label --> visible text
+value --> value attribute
+index --> index of the option (0,1,2,3...)
+
+
+2. Non Select tag dropdown
+<li>
+<ul>
+
+-> normal click-> click()
+await page.locator().click()
+
+
+
+
+
+ClassRoom:
+Use PageFixture
+Url:https://www.telerik.com/contact
+1st dropdown -> index
+2nd dropdown -> value
+3rd dropdown -> label
