@@ -1,0 +1,1258 @@
+📑 Agenda – Day 06 |  Playwright Assertions
+
+================================================================================
+                              XPATH IN PLAYWRIGHT
+================================================================================
+
+ATTRIBUTE PRIORITY
+================================================================================
+
+When choosing attributes for locating elements, follow this priority order:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Priority │ Attribute    │ Reason                                            │
+├──────────┼──────────────┼───────────────────────────────────────────────────┤
+│ 1️⃣       │ aria-label   │ Accessibility-based, stable, first choice        │
+│ 2️⃣       │ id           │ Unique, fast                                     │
+│ 3️⃣       │ name         │ Usually stable, not always unique                │
+│ 4️⃣       │ class        │ For styling, changes often → least reliable      │
+└──────────┴──────────────┴───────────────────────────────────────────────────┘
+
+
+================================================================================
+                    XPATH - TWO TYPES
+================================================================================
+
+1. Absolute XPath
+2. Relative XPath
+
+1. ABSOLUTE XPATH:
+--------------------------------------------------------------------------------
+Starts from the root of the HTML document (/html).
+Full path from root to the element.
+Brittle - breaks if DOM structure changes.
+
+Example:
+/html/body/div[2]/div[2]/div/form/p/input
+
+
+2. RELATIVE XPATH:
+--------------------------------------------------------------------------------
+Starts from anywhere in the DOM (//).
+More stable and preferred.
+Does not depend on full path structure.
+
+Two Types:
+  A) Basic Relative XPath
+  B) Advanced Relative XPath (Axes)
+
+
+================================================================================
+                    A) BASIC RELATIVE XPATH
+================================================================================
+
+1. Attribute Based XPath:
+--------------------------------------------------------------------------------
+SYNTAX:
+  //tagName[@attribute='attributeValue']
+
+EXAMPLE:
+  //input[@id='username']
+
+HTML:
+  <input id="username">
+
+2. Text Based XPath:
+--------------------------------------------------------------------------------
+SYNTAX:
+  //tagName[text()='text value in DOM']
+
+EXAMPLE:
+  //button[text()='Login']
+
+HTML:
+  <button>Login</button>
+
+3. Partial Attribute Based XPath:
+--------------------------------------------------------------------------------
+SYNTAX:
+  //tagName[contains(@attribute, 'Partial value of the attribute')]
+
+EXAMPLE:
+  //input[contains(@id, 'user')]
+
+HTML:
+  <input id="user_12345">
+
+4. Partial Text Based XPath:
+--------------------------------------------------------------------------------
+SYNTAX:
+  //tagName[contains(text(), 'Partial text in my DOM')]
+
+EXAMPLE:
+  //button[contains(text(), 'Log')]
+
+HTML:
+  <button>Login</button>
+
+5. Collection Based XPath (Index):
+--------------------------------------------------------------------------------
+SYNTAX:
+  (//tagName[@attribute='attributeValue'])[index]
+
+EXAMPLE:
+  (//button[@class='btn'])[2]
+
+HTML:
+  <button class="btn">Save</button>
+  <button class="btn">Delete</button>  ← This one (index 2)
+
+
+-------------------------------------------------------------------------------------
+Classroom Activity:
+-------------------------------------------------------------------------------------
+
+Description:
+This hands-on activity is designed to help you gain practical experience in automating 
+web application interactions using Playwright. You will learn to locate web elements 
+using various CSS selector strategies and implement XPath-based locators to identify and
+interact with form fields on the Salesforce login page. The activity also reinforces 
+the importance of validation by verifying successful login through element presence on 
+the landing page.
+
+-------------------------------------------------------------------------------------
+Objectives:
+-------------------------------------------------------------------------------------
+1. To understand and apply different CSS selector strategies (ID, Class, and Attribute) 
+for locating web elements.
+2. To implement XPath selector strategies for locating the username and password fields, 
+as well as the login button.
+3. To automate the process of entering credentials and submitting a login form.
+4. To verify login success by detecting a specific element on the post-login landing page.
+5. To compare and contrast CSS selectors and XPath for element identification in real-world scenarios.
+
+-------------------------------------------------------------------------------------
+Tasks to Perform:
+-------------------------------------------------------------------------------------
+1. Navigate to the Salesforce login page.
+2. Use different CSS selector strategies (ID, Class, and Attribute) to locate the username 
+and password fields.
+3. Use XPath selectors (Absolute, Relative, and Attribute-based) to also locate the username 
+and password fields.
+4. Enter the sample credentials into the username and password fields.
+5. Click the login button using both CSS and XPath selectors.
+6. Verify that the login was successful by checking for a specific element on the landing page.
+
+-------------------------------------------------------------------------------------
+URL:
+https://login.salesforce.com/?locale=in
+
+Sample Credentials:
+Username: dilipkumar.rajendran@testleaf.com
+Password: TestLeaf@2025
+
+-------------------------------------------------------------------------------------
+
+================================================================================
+                    B) ADVANCED RELATIVE XPATH (AXES)
+================================================================================
+
+Axes path: XPath based on relationship between elements.
+
+1. PARENT TO CHILD:
+--------------------------------------------------------------------------------
+SYNTAX:
+  //relative xpath of parent/child tag
+
+EXAMPLE:
+  //p[@class='top']/label
+
+HTML:
+  <p class="top">
+    <label>Username</label>
+  </p>
+
+2. CHILD TO PARENT:
+--------------------------------------------------------------------------------
+SYNTAX:
+  //relative xpath of child/parent::parent tag
+
+EXAMPLE:
+  //input[@id='password']/parent::p
+
+HTML:
+  <p>
+    <input id="password">
+  </p>
+
+3. GRAND PARENT TO GRAND CHILD:
+--------------------------------------------------------------------------------
+SYNTAX:
+  //relative xpath of grand parent//grand child tag
+
+EXAMPLE:
+  //form[@id='login']//label
+
+HTML:
+  <form id="login">
+    <div>
+      <label>Username</label>
+    </div>
+  </form>
+
+4. GRAND CHILD TO GRAND PARENT:
+--------------------------------------------------------------------------------
+SYNTAX:
+  //relative xpath of grand child/ancestor::grand parent tag
+
+EXAMPLE:
+  //input[@class='decorativeSubmit']/ancestor::form
+
+HTML:
+  <form>
+    <div>
+      <input class="decorativeSubmit">
+    </div>
+  </form>
+
+5. ELDER SIBLING TO YOUNGER SIBLING:
+--------------------------------------------------------------------------------
+SYNTAX:
+  //relative xpath of elder sibling/following-sibling::younger sibling tag
+
+EXAMPLE:
+  //label[text()='Username']/following-sibling::input
+
+HTML:
+  <label>Username</label>
+  <input>  ← This one (following sibling)
+
+6. YOUNGER SIBLING TO ELDER SIBLING:
+--------------------------------------------------------------------------------
+SYNTAX:
+  //relative xpath of younger sibling/preceding-sibling::tag of elder sibling
+
+EXAMPLE:
+  //input[@id='username']/preceding-sibling::label
+
+HTML:
+  <label>Username</label>  ← This one (preceding sibling)
+  <input id="username">
+
+7. ELDER COUSIN TO YOUNGER COUSIN (Top to Bottom):
+--------------------------------------------------------------------------------
+SYNTAX:
+  Elder cousin relative xpath/following::tagName of younger cousin
+
+EXAMPLE 1:
+  //input[@id="username"]/following::label
+
+EXAMPLE 2:
+  //input[@id="username"]/following::input
+
+HTML:
+  <div>
+    <input id="username">
+  </div>
+  <div>
+    <label>Email</label>  ← following label
+    <input>               ← following input
+  </div>
+
+8. YOUNGER COUSIN TO ELDER COUSIN (Bottom to Top):
+--------------------------------------------------------------------------------
+SYNTAX:
+  Younger cousin xpath/preceding::tagName of elder cousin
+
+EXAMPLE:
+  //label[text()='Password']/preceding::input
+
+HTML:
+  <div>
+    <input>               ← preceding input
+  </div>
+  <div>
+    <label>Password</label>  ← This is the starting element
+  </div>
+
+EXAMPLE WITH INDEX:
+  (//input[@class="decorativeSubmit"]/preceding::input)[1]
+
+
+================================================================================
+                    QUICK REFERENCE TABLE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Axes Type              │ Symbol/Keyword │ Direction                        │
+├────────────────────────┼────────────────┼──────────────────────────────────┤
+│ Parent to Child        │ /              │ Top → Bottom                     │
+│ Child to Parent        │ parent::       │ Bottom → Top                     │
+│ GP to GC               │ //             │ Top → Bottom (multiple levels)   │
+│ GC to GP               │ ancestor::     │ Bottom → Top (multiple levels)   │
+│ Elder → Younger Sibling│ following-     │ Left → Right (same level)        │
+│                        │ sibling::      │                                  │
+│ Younger → Elder Sibling│ preceding-     │ Right → Left (same level)        │
+│                        │ sibling::      │                                  │
+│ Elder → Younger Cousin │ following::    │ Top → Bottom (different levels)  │
+│ Younger → Elder Cousin │ preceding::    │ Bottom → Top (different levels)  │
+└────────────────────────┴────────────────┴──────────────────────────────────┘
+
+
+================================================================================
+                    BEST PRACTICES - XPATH IN PLAYWRIGHT
+================================================================================
+
+✅ PREFER CSS Selectors over XPath when possible
+  CSS selectors are faster and more readable
+
+✅ USE Role-based locators when available
+  getByRole(), getByText(), getByLabel()
+
+✅ AVOID Absolute XPath
+  Breaks easily with DOM changes
+
+✅ USE Relative XPath with stable attributes
+  id, name, aria-label, data-testid
+
+✅ USE Contains for dynamic values
+  //tag[contains(@id, 'partial')]
+
+✅ USE Axes for complex relationships
+  When elements don't have unique attributes
+
+
+================================================================================
+                              PLAYWRIGHT LOCATORS
+================================================================================
+
+INTRODUCTION
+================================================================================
+
+Locators are the central piece of Playwright's auto-waiting and retry-ability.
+In a nutshell, locators represent a way to find element(s) on the page at any
+moment.
+
+
+QUICK GUIDE - RECOMMENDED BUILT-IN LOCATORS
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Locator Method              │ Description                                    │
+├─────────────────────────────┼────────────────────────────────────────────────┤
+│ page.getByRole()            │ Locate by explicit/implicit accessibility      │
+│ page.getByText()            │ Locate by text content                         │
+│ page.getByLabel()           │ Locate form controls by their accessible label │ 
+│				     (label, aria-label, or aria-labelledby)   │
+│ page.getByPlaceholder()     │ Locate input by placeholder attribute          │
+│ page.getByAltText()         │ Locate element (usually image) by alt text     │
+│ page.getByTitle()           │ Locate element by title attribute              │
+│ page.getByTestId()          │ Locate element by data-testid attribute        │
+└─────────────────────────────┴────────────────────────────────────────────────┘
+
+EXAMPLE USAGE:
+--------------------------------------------------------------------------------
+await page.getByLabel('User Name').fill('John');
+await page.getByLabel('Password').fill('secret-password');
+await page.getByRole('button', { name: 'Sign in' }).click();
+await expect(page.getByText('Welcome, John!')).toBeVisible();
+
+
+LOCATING ELEMENTS
+================================================================================
+
+Playwright comes with multiple built-in locators. To make tests resilient,
+prioritize user-facing attributes and explicit contracts such as getByRole().
+
+DOM Example:
+--------------------------------------------------------------------------------
+<button>Sign in</button>
+
+Locator:
+--------------------------------------------------------------------------------
+await page.getByRole('button', { name: 'Sign in' }).click();
+
+
+
+LOCATOR RE-USE (Dynamic Element Location)
+--------------------------------------------------------------------------------
+Every time a locator is used for an action, an up-to-date DOM element is
+located. If the DOM changes between calls, the new element is used.
+
+const locator = page.getByRole('button', { name: 'Sign in' });
+await locator.hover();
+await locator.click();
+
+
+LOCATE BY ROLE
+================================================================================
+
+The getByRole() locator reflects how users and assistive technology perceive
+the page. When locating by role, you should usually pass the accessible name.
+
+DOM Example:
+--------------------------------------------------------------------------------
+<h3>Sign up</h3>
+<label>
+  <input type="checkbox" /> Subscribe
+</label>
+<br/>
+<button>Submit</button>
+
+Locators:
+--------------------------------------------------------------------------------
+await expect(page.getByRole('heading', { name: 'Sign up' })).toBeVisible();
+await page.getByRole('checkbox', { name: 'Subscribe' }).check();
+await page.getByRole('button', { name: 'submit'}).click();
+
+Role locators include: buttons, checkboxes, headings, links, lists, tables, etc.
+They follow W3C specifications for ARIA role, attributes, and accessible name.
+
+WHEN TO USE ROLE LOCATORS:
+Prioritize role locators as they align with user and assistive technology
+perception.
+
+
+LOCATE BY LABEL
+================================================================================
+
+Most form controls have dedicated labels. Use getByLabel() to locate by
+associated label text.
+
+DOM Example:
+--------------------------------------------------------------------------------
+<label>Password <input type="password" /></label>
+
+Locator:
+--------------------------------------------------------------------------------
+await page.getByLabel('Password').fill('secret');
+
+WHEN TO USE LABEL LOCATORS:
+Use for locating form fields.
+
+
+LOCATE BY PLACEHOLDER
+================================================================================
+
+Inputs may have a placeholder attribute. Use getByPlaceholder().
+
+DOM Example:
+--------------------------------------------------------------------------------
+<input type="email" placeholder="name@example.com" />
+
+Locator:
+--------------------------------------------------------------------------------
+await page.getByPlaceholder('name@example.com').fill('playwright@microsoft.com');
+
+WHEN TO USE PLACEHOLDER LOCATORS:
+Use for form elements without labels but with placeholder text.
+
+
+LOCATE BY TEXT
+================================================================================
+
+Find an element by its text content using getByText(). Supports substring,
+exact string, or regular expression.
+
+DOM Example:
+--------------------------------------------------------------------------------
+<span>Welcome, John</span>
+
+Locators:
+--------------------------------------------------------------------------------
+await expect(page.getByText('Welcome, John')).toBeVisible();
+await expect(page.getByText('Welcome, John', { exact: true })).toBeVisible();
+await expect(
+    page.getByText(/welcome, [A-Za-z ]+$/i)
+).toBeVisible();
+NOTE:
+Matching by text normalizes whitespace (multiple spaces → one, line breaks →
+spaces, trims leading/trailing whitespace).
+
+WHEN TO USE TEXT LOCATORS:
+Use for non-interactive elements (div, span, p, etc.). For interactive elements
+(button, a, input), use role locators. Also useful for filtering items in lists.
+
+
+LOCATE BY ALT TEXT
+================================================================================
+
+Images should have alt attribute. Use getByAltText() to locate by text
+alternative.
+
+DOM Example:
+--------------------------------------------------------------------------------
+<img alt="playwright logo" src="/img/playwright-logo.svg" width="100" />
+
+Locator:
+--------------------------------------------------------------------------------
+await page.getByAltText('playwright logo').click();
+
+WHEN TO USE ALT LOCATORS:
+Use for elements supporting alt text (img, area).
+
+
+LOCATE BY TITLE
+================================================================================
+
+Locate an element with a matching title attribute using getByTitle().
+
+DOM Example:
+--------------------------------------------------------------------------------
+<span title='Issues count'>25 issues</span>
+
+Locator:
+--------------------------------------------------------------------------------
+await expect(page.getByTitle('Issues count')).toHaveText('25 issues');
+
+WHEN TO USE TITLE LOCATORS:
+Use when the element has a title attribute.
+
+
+LOCATE BY TEST ID
+================================================================================
+
+Testing by test ids is the most resilient way. QA and developers define explicit
+test ids and query with getByTestId(). However, it's not user-facing.
+
+DOM Example:
+--------------------------------------------------------------------------------
+<button data-testid="directions">Itinéraire</button>
+
+Locator:
+--------------------------------------------------------------------------------
+await page.getByTestId('directions').click();
+
+WHEN TO USE TESTID LOCATORS:
+Use when choosing the test id methodology or when role/text locators are not
+feasible.
+
+SET A CUSTOM TEST ID ATTRIBUTE:
+--------------------------------------------------------------------------------
+By default, getByTestId() uses data-testid. Configure a custom attribute in
+playwright.config.ts:
+
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  use: {
+    testIdAttribute: 'data-pw'
+  }
+});
+
+Now use in HTML:
+<button data-pw="directions">Itinéraire</button>
+
+Locator (same usage):
+await page.getByTestId('directions').click();
+
+
+CHAINING LOCATORS
+--------------------------------------------------------------------------------
+All locator creation methods are also available on Locator and FrameLocator
+classes, allowing chaining and iterative narrowing.
+
+const locator = page
+    .frameLocator('#my-frame')
+    .getByRole('button', { name: 'Sign in' });
+await locator.click();
+
+
+
+NOTE:
+Use the code generator to generate a locator, then edit it as needed.
+
+---------------------------------------------------------------------------------
+================================================================================
+                    CLASSROOM ASSIGNMENT: AUTOMATE FACEBOOK LOGIN
+================================================================================
+
+LEARNING OBJECTIVE:
+--------------------------------------------------------------------------------
+To automate the login process on a web application using Playwright
+
+ASSIGNMENT DETAILS:
+--------------------------------------------------------------------------------
+Your task is to login to the web application using Playwright Locators.
+
+REQUIREMENTS:
+--------------------------------------------------------------------------------
+1. Instantiate the test() funtion
+2. Load the URL: https://www.facebook.com/
+3. Enter the email id: testleaf.2023@gmail.com
+4. Enter the password: Tuna@321
+5. Click on the Login button
+6. Click on the 'Find your account and log in.' link
+7. Verify the title of the current web page
+
+================================================================================
+
+================================================================================
+                    GENERIC ASSERTIONS & LOCATOR ASSERTIONS
+                              FRAMES INTRODUCTION
+================================================================================
+
+
+PART 1: GENERIC ASSERTIONS
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Generic Assertions are used to validate simple values, variables, calculations,
+API response fields, boolean conditions, etc.
+
+These are immediate checks (non-retry) and do NOT depend on UI elements.
+
+USE CASES:
+--------------------------------------------------------------------------------
+• Comparing numbers
+• Comparing strings
+• Checking boolean results
+• Validating object values
+• Checking array lengths
+• Validating API response data
+
+
+COMMON GENERIC ASSERTIONS
+================================================================================
+
+1. toBe()
+--------------------------------------------------------------------------------
+Checks strict equality (number, boolean, etc.)
+
+expect(status).toBe("assigned");
+expect(isLoggedIn).toBe(true);
+
+2. toEqual()
+--------------------------------------------------------------------------------
+Checks value equality for objects or arrays
+
+expect([1, 2]).toEqual([1, 2]);
+expect({a: 1}).toEqual({a: 1});
+
+3. toBeTruthy()
+--------------------------------------------------------------------------------
+Passes if the value is any "truthy" value.
+
+expect("hello").toBeTruthy();
+expect(1).toBeTruthy();
+
+4. toBeFalsy()
+--------------------------------------------------------------------------------
+Passes if the value is "falsy".
+Falsy values: 0, null, undefined, false, ""
+
+expect("").toBeFalsy();
+expect(0).toBeFalsy();
+
+5. toBeGreaterThan()
+--------------------------------------------------------------------------------
+Checks if a number is greater than another.
+
+expect(10).toBeGreaterThan(5);
+
+6. toBeLessThan()
+--------------------------------------------------------------------------------
+Checks if a number is less than another.
+
+expect(3).toBeLessThan(10);
+
+7. toBeGreaterThanOrEqual() / toBeLessThanOrEqual()
+--------------------------------------------------------------------------------
+Useful for ranges.
+
+8. toContain()
+--------------------------------------------------------------------------------
+Checks if an array or string contains something.
+
+expect([1,2,3]).toContain(2);
+expect("playwright").toContain("write");
+
+9. toMatch()
+--------------------------------------------------------------------------------
+Matches a string using a regex pattern.
+
+expect("Welcome123").toMatch(/Welcome/);
+
+10. toBeNull() / toBeDefined() / toBeUndefined()
+--------------------------------------------------------------------------------
+State checks.
+
+expect(value).toBeNull();
+expect(name).toBeDefined();
+
+
+KEY CHARACTERISTIC:
+--------------------------------------------------------------------------------
+Generic Assertions do NOT auto-retry. They are immediate checks.
+
+Generic Assertions = JavaScript value checks
+Locator Assertions = UI element checks
+
+
+================================================================================
+PART 2: LOCATOR ASSERTIONS
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Locator Assertions are used to validate the state, visibility, text, attributes,
+and behavior of UI elements in the webpage.
+
+These assertions are performed on elements identified using locators such as:
+page.locator(), getByRole(), getByText(), etc.
+
+KEY FEATURE:
+--------------------------------------------------------------------------------
+Locator assertions AUTO-RETRY, meaning Playwright keeps checking the condition
+until it becomes true or times out. This makes them very reliable for dynamic UI.
+
+Playwright will:
+----------------
+Check
+ ↓
+Fail
+ ↓
+Retry
+ ↓
+Fail
+ ↓
+Retry
+ ↓
+Pass or Timeout
+
+This is called Auto-Retry Assertions.
+
+Default Assertion Timeout : 5000 ms
+
+
+Modifying Assertion Timeout
+--------------------------------
+
+Specific Assertion
+
+await expect(locator)
+      .toBeVisible({ timeout: 10000 });
+
+Meaning:
+
+Retry for up to 10 seconds
+
+USE CASES:
+--------------------------------------------------------------------------------
+• Checking visibility of elements
+• Verifying buttons are enabled/disabled
+• Validating text content
+• Checking input field values
+• Ensuring elements appear/disappear
+• Counting number of elements
+• Validating element attributes (e.g., type, href)
+
+
+
+Action Timeout
+------------------------------------
+What it is
+===========
+
+Action timeout controls operations like:
+
+click()
+fill()
+check()
+selectOption()
+hover()
+dblclick()
+
+Example
+
+await page.locator('#login').click();
+
+Before clicking, Playwright performs:
+=====================================
+
+Element Attached?
+Element Visible?
+Element Stable?
+Element Enabled?
+Receives Events?
+
+These are Actionability Checks.
+
+Default Action Timeout
+=======================
+By default:
+
+0
+
+Meaning:
+==============
+No separate action timeout.
+
+Actions use:
+==============
+Test Timeout
+Navigation Timeout
+
+as fallback.
+
+Setting Action Timeout
+======================
+
+Specific Action:
+
+await page.locator('#login')
+          .click({
+             timeout:10000
+          });
+
+Meaning:
+
+Wait up to 10 seconds
+for element to become clickable.
+
+Global Action Timeout
+=====================
+export default defineConfig({
+
+    use:{
+        actionTimeout:10000
+    }
+
+})
+
+COMMON LOCATOR ASSERTIONS
+================================================================================
+
+1. toBeVisible()
+--------------------------------------------------------------------------------
+Checks that the element is visible on the page.
+
+await expect(locator).toBeVisible();
+
+2. toBeHidden()
+--------------------------------------------------------------------------------
+Checks that the element is present but not visible.
+
+await expect(locator).toBeHidden();
+
+3. toBeEnabled()
+--------------------------------------------------------------------------------
+Checks if the element is enabled and interactive.
+
+await expect(button).toBeEnabled();
+
+4. toBeDisabled()
+--------------------------------------------------------------------------------
+Checks if the element is disabled (cannot be clicked or typed into).
+
+await expect(button).toBeDisabled();
+
+5. toBeEditable()
+--------------------------------------------------------------------------------
+Checks if an input field is editable by the user.
+
+await expect(input).toBeEditable();
+
+6. toHaveText()
+--------------------------------------------------------------------------------
+Checks for exact match of text inside an element.
+
+await expect(locator).toHaveText("Login Successful");
+
+7. toContainText()
+--------------------------------------------------------------------------------
+Checks if the element contains partial text (substring).
+
+await expect(locator).toContainText("Success");
+
+8. toHaveValue()
+--------------------------------------------------------------------------------
+Checks the value of input elements (textbox, textarea).
+
+await expect(input).toHaveValue("Testleaf");
+
+9. toHaveAttribute()
+--------------------------------------------------------------------------------
+Checks if an element has a specific attribute.
+
+await expect(link).toHaveAttribute("href", "/dashboard");
+
+10. toHaveCount()
+--------------------------------------------------------------------------------
+Checks how many elements match the locator.
+
+await expect(locator).toHaveCount(5);
+
+11. toBeChecked() / toBeUnchecked()
+--------------------------------------------------------------------------------
+Used for checkboxes, radio buttons, switches.
+
+await expect(checkbox).toBeChecked();
+
+
+EXAMPLES:
+--------------------------------------------------------------------------------
+✓ Check if the login button is visible
+✓ Verify the error message contains correct text
+✓ Validate username field is editable
+✓ Ensure product list displays 10 items
+✓ Check the checkbox is selected after clicking it
+
+KEY CHARACTERISTIC:
+--------------------------------------------------------------------------------
+Locator assertions auto-retry because UI loads dynamically.
+This is why they are more stable in automation.
+
+
+SUMMARY TABLE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Feature                    │ Generic Assertions │ Locator Assertions        │
+├────────────────────────────┼────────────────────┼───────────────────────────┤
+│ Purpose                    │ Values, Variables  │ UI Elements               │
+│ Auto-retry                 │ NO                 │ YES                       │
+│ Depends on UI              │ NO                 │ YES                       │
+│ Examples                   │ toBe(), toEqual()  │ toBeVisible(), toHaveText │
+└────────────────────────────┴────────────────────┴───────────────────────────┘
+
+================================================================================
+                    CLASSROOM ASSIGNMENT: AUTOMATE FACEBOOK LOGIN
+================================================================================
+
+LEARNING OBJECTIVE:
+--------------------------------------------------------------------------------
+To automate the login process on a web application using Playwright
+
+ASSIGNMENT DETAILS:
+--------------------------------------------------------------------------------
+Your task is to login to the web application using Playwright Locators.
+
+REQUIREMENTS:
+--------------------------------------------------------------------------------
+1. Instantiate the test() funtion
+2. Load the URL: https://www.facebook.com/
+3. Enter the email id: testleaf.2023@gmail.com
+4. Enter the password: Tuna@321
+5. Click on the Login button
+6. Click on the 'Find your account and log in.' link
+7. Verify the title of the current web page
+
+
+================================================================================
+              CLASSROOM ASSIGNMENT: HANDLING DROPDOWN ELEMENTS
+================================================================================
+
+LEARNING OBJECTIVE:
+--------------------------------------------------------------------------------
+To understand the structure of dropdown elements in DOM and to handle them
+using Playwright's selectOption() method.
+
+ASSIGNMENT DETAILS:
+--------------------------------------------------------------------------------
+Your task is to select values from dropdown in a web page using Playwright
+selectOption().
+
+PRECONDITION:
+--------------------------------------------------------------------------------
+Load the URL: http://leaftaps.com/opentaps/
+
+
+REQUIREMENTS:
+================================================================================
+
+1. Enter the username as 'democsr'
+2. Enter the password as 'crmsfa'
+3. Click on the Login button
+4. Click on the CRM/SFA link
+5. Click on the Leads tab
+6. Click on the Create Lead link from shortcuts
+7. Enter the mandatory fields on the web page
+8. Select Employee in the source dropdown (using index)
+9. Select Automobile in the Marketing Campaign (using visibleText)
+10. Select Corporation in Ownership (using value)
+11. Click on the Create Lead button
+12. Verify the title of the current web page
+
+
+================================================================================
+			    FRAMES INTRODUCTION
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+A Page can have one or more Frame objects attached to it. Each page has a main
+frame and page-level interactions (like click) are assumed to operate in the
+main frame.
+
+A page can have additional frames attached with the iframe HTML tag. These
+frames can be accessed for interactions inside the frame.
+
+EXAMPLE - Interacting with elements inside a frame:
+--------------------------------------------------------------------------------
+// Locate element inside frame
+const username = await page.frameLocator('.frame-class').getByLabel('User Name');
+await username.fill('John');
+
+
+FRAME OBJECTS API:
+--------------------------------------------------------------------------------
+One can access frame objects using the page.frame() API:
+
+// Get frame using the frame's name attribute
+const frame = page.frame('frame-login');
+
+// Get frame using frame's URL
+const frame = page.frame({ url: /.*domain.*/ });
+
+
+FRAME LOCATOR VS PAGE.FRAME()
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Method                      │ Description                                    │
+├─────────────────────────────┼────────────────────────────────────────────────┤
+│ page.frameLocator()         │ Returns a FrameLocator object for chaining     │
+│                             │ element lookups inside the iframe             │
+├─────────────────────────────┼────────────────────────────────────────────────┤
+│ page.frame()                │ Returns a Frame object by name or URL          │
+│                             │ Used for direct frame access                  │
+└─────────────────────────────┴────────────────────────────────────────────────┘
+
+EXAMPLE WITH FRAMELOCATOR:
+--------------------------------------------------------------------------------
+const frame = page.frameLocator('#payment-iframe');
+await frame.getByRole('button', { name: 'Submit' }).click();
+
+EXAMPLE WITH PAGE.FRAME():
+--------------------------------------------------------------------------------
+const frame = page.frame('payment-frame');
+await frame.locator('#submit').click();
+
+================================================================================
+                    FRAME vs FRAMES vs FRAMELOCATOR IN PLAYWRIGHT
+================================================================================
+
+INTRODUCTION
+================================================================================
+
+This is one of the most confusing topics for Selenium users because Playwright
+provides 3 different APIs.
+
+Think of it like this:
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Method                    │ Purpose                                         │
+├───────────────────────────┼─────────────────────────────────────────────────┤
+│ frameLocator()            │ I know the frame locator and want to work       │
+│                           │ inside it                                       │
+├───────────────────────────┼─────────────────────────────────────────────────┤
+│ frame()                   │ I want a specific Frame object                  │
+├───────────────────────────┼─────────────────────────────────────────────────┤
+│ frames()                  │ I want all Frame objects available on the page  │
+└───────────────────────────┴─────────────────────────────────────────────────┘
+
+
+================================================================================
+1. page.frameLocator()
+================================================================================
+
+WHAT IT IS:
+--------------------------------------------------------------------------------
+Returns: FrameLocator
+
+Used to:
+  Locate a frame → Locate elements inside the frame → Perform actions
+
+WHEN TO USE:
+--------------------------------------------------------------------------------
+✅ Most automation scenarios
+✅ Interacting with elements inside a frame
+✅ Recommended by Playwright
+
+HOW TO USE:
+--------------------------------------------------------------------------------
+HTML:
+<iframe id="loginFrame">
+
+Code:
+await page
+    .frameLocator('#loginFrame')
+    .locator('#username')
+    .fill('admin');
+
+WHY PLAYWRIGHT RECOMMENDS IT:
+--------------------------------------------------------------------------------
+Benefits:
+  • Auto Waiting
+  • Auto Retry
+  • Strict Mode
+  • Lazy Evaluation
+
+Same benefits as Locator.
+
+REAL PROJECT EXAMPLE:
+--------------------------------------------------------------------------------
+await page
+    .frameLocator('#paymentFrame')
+    .getByPlaceholder('Card Number')
+    .fill('123456789');
+
+
+================================================================================
+2. page.frame()
+================================================================================
+
+WHAT IT IS:
+--------------------------------------------------------------------------------
+Returns: Frame | null
+
+Used to fetch a specific frame object.
+
+WHEN TO USE:
+--------------------------------------------------------------------------------
+✅ Need frame metadata
+✅ Need frame name/url
+✅ Need to store frame in a variable
+✅ Dynamic frame handling
+
+HOW TO USE:
+--------------------------------------------------------------------------------
+
+By Name:
+const frame = page.frame({
+    name: 'loginFrame'
+});
+
+By URL:
+const frame = page.frame({
+    url: /login/
+});
+
+Then:
+await frame?.locator('#username')
+            .fill('admin');
+
+REAL PROJECT EXAMPLE:
+--------------------------------------------------------------------------------
+Suppose:
+  • Frame Name changes
+  • Frame URL remains constant
+
+const frame = page.frame({
+    url: /payment/
+});
+
+Now work inside it.
+
+
+================================================================================
+3. page.frames()
+================================================================================
+
+WHAT IT IS:
+--------------------------------------------------------------------------------
+Returns: Frame[]
+
+Array of all frames on the page.
+
+WHEN TO USE:
+--------------------------------------------------------------------------------
+✅ Debugging
+✅ Frame discovery
+✅ Unknown frame names
+✅ Interview demonstrations
+
+HOW TO USE:
+--------------------------------------------------------------------------------
+const frames = page.frames();
+console.log(frames.length);
+
+Output:
+4
+
+Meaning:
+  • Main Frame
+  • Frame 1
+  • Frame 2
+  • Frame 3
+
+ITERATE ALL FRAMES:
+--------------------------------------------------------------------------------
+for(const frame of page.frames()){
+    console.log(frame.name());
+    console.log(frame.url());
+}
+
+Output:
+main
+https://app.com
+
+paymentFrame
+https://payment.com
+
+chatFrame
+https://chat.com
+
+
+================================================================================
+COMPARISON TABLE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Feature                    │ frameLocator() │ frame()    │ frames()         │
+├────────────────────────────┼────────────────┼────────────┼──────────────────┤
+│ Return Type                │ FrameLocator   │ Frame|null │ Frame[]          │
+│ Recommended                │ ✅ Yes         │ ⚠️ Sometimes│ ⚠️ Rarely       │
+│ Auto Waiting               │ ✅ Yes         │ ❌ No      │ ❌ No            │
+│ Auto Retry                 │ ✅ Yes         │ ❌ No      │ ❌ No            │
+│ Locator Chaining           │ ✅ Yes         │ ❌ No      │ ❌ No            │
+│ Interact Inside Frame      │ ✅ Best Choice │ ✅ Possible│ ❌ Need Frame    │
+│ Get Frame Metadata         │ ❌ No          │ ✅ Yes     │ ✅ Yes           │
+│ Discover All Frames        │ ❌ No          │ ❌ No      │ ✅ Yes           │
+└────────────────────────────┴────────────────┴────────────┴──────────────────┘
+
+
+================================================================================
+SELENIUM MAPPING
+================================================================================
+
+SELENIUM:
+--------------------------------------------------------------------------------
+driver.switchTo().frame("frame1");
+driver.findElement(...)
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+page.frameLocator('#frame1')
+    .locator(...)
+
+No switching required!
+
+
+================================================================================
+QUICK DECISION GUIDE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Scenario                                    │ Use This                      │
+├─────────────────────────────────────────────┼────────────────────────────────┤
+│ I need to click a button inside an iframe   │ frameLocator() ✅              │
+│ I need to know the name of a frame          │ frame() ✅                     │
+│ I need to get all frames on the page        │ frames() ✅                    │
+│ I'm writing a new test                      │ frameLocator() ✅              │
+│ I need frame URL for debugging              │ frame() ✅                     │
+│ I don't know frame name or locator          │ frames() to discover first    │
+└─────────────────────────────────────────────┴────────────────────────────────┘
+
+
+================================================================================
+ONE-LINE TAKEAWAY (INTERVIEW READY)
+================================================================================
+
+"Use frameLocator() for interacting with elements inside iframes as it provides
+auto-waiting and retry capabilities. Use frame() when you need frame metadata
+like name or URL. Use frames() for debugging or discovering all frames on a page."
+
+================================================================================
