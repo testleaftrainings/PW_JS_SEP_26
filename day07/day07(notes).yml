@@ -1,0 +1,926 @@
+📑 Agenda – Day 07 | TypeScript Fundamentals
+
+
+================================================================================
+PART 1: ALERT HANDLING IN PLAYWRIGHT - DEEP DIVE
+================================================================================
+
+
+FIRST UNDERSTAND WHAT AN ALERT IS
+================================================================================
+
+JavaScript Alerts are Browser Native Dialogs.
+
+Examples:
+--------------------------------------------------------------------------------
+alert("Hello");
+confirm("Are you sure?");
+prompt("Enter your name");
+
+These are NOT HTML elements.
+
+They belong to:
+  Browser Process
+
+NOT to:
+  DOM or Render Process
+
+
+BROWSER ARCHITECTURE RELATION
+================================================================================
+
+When this executes:
+alert("Hello");
+
+Flow:
+--------------------------------------------------------------------------------
+Application JS
+      ↓
+Render Process
+      ↓
+Browser Process
+      ↓
+Native Dialog Appears
+
+At this moment:
+  • DOM becomes blocked
+  • User interaction stops
+  • JavaScript execution pauses
+
+This is how browser dialogs work.
+
+
+WHY CAN'T LOCATOR HANDLE ALERTS?
+================================================================================
+
+Many beginners try:
+  page.locator("alert")
+or
+  page.getByText("OK")
+
+This will NEVER work.
+
+Reason:
+  Alert is NOT part of DOM
+
+It belongs to Browser Process.
+Inspect Element won't show it.
+
+
+ page.on()
+================================================================================
+
+page.on("dialog", async (alert) => {
+  // handler
+})
+
+WHAT IS page.on()?
+--------------------------------------------------------------------------------
+It is an Event Listener.
+
+Syntax:
+  page.on(eventName, callback)
+
+Similar to:
+  button.addEventListener("click", callback)
+
+
+WHAT HAPPENS INTERNALLY?
+--------------------------------------------------------------------------------
+page.on("dialog", callback)
+
+means:
+  "Hey Playwright, if any dialog appears, immediately notify me."
+
+Playwright registers an event listener.
+
+INTERNAL FLOW:
+--------------------------------------------------------------------------------
+Your Test
+      ↓
+page.on("dialog")
+      ↓
+Listener Registered
+      ↓
+Waiting...
+      ↓
+Button Click
+      ↓
+Application Creates Alert
+      ↓
+Browser Process Creates Dialog
+      ↓
+Playwright Detects Dialog
+      ↓
+dialog Event Fires
+      ↓
+Callback Executes
+
+
+WHY LISTENER BEFORE CLICK?
+================================================================================
+
+CORRECT:
+--------------------------------------------------------------------------------
+page.on("dialog", callback)
+await page.click()
+
+WRONG:
+--------------------------------------------------------------------------------
+await page.click()
+page.on("dialog", callback)
+
+Reason:
+  Alert may appear before listener is registered.
+  Then Playwright misses the event.
+
+
+UNDERSTANDING THE DIALOG OBJECT
+================================================================================
+
+Inside the callback, alert is a Dialog object.
+
+Dialog Object contains:
+  • type()
+  • message()
+  • accept()
+  • dismiss()
+  • defaultValue()
+
+
+alert.type()
+--------------------------------------------------------------------------------
+Returns the dialog type.
+
+Possible values:
+  • alert
+  • confirm
+  • prompt
+  • beforeunload
+
+Example:
+alert("Hello") returns "alert"
+
+
+alert.message()
+--------------------------------------------------------------------------------
+Returns the displayed text.
+
+Example:
+alert("Welcome to Testleaf")
+
+Code:
+console.log(alert.message())  // Output: Welcome to Testleaf
+
+
+alert.accept()
+--------------------------------------------------------------------------------
+Equivalent to: User clicks OK
+
+Example:
+await alert.accept()
+
+
+alert.dismiss()
+--------------------------------------------------------------------------------
+Equivalent to: User clicks Cancel
+
+Example:
+await alert.dismiss()
+
+
+PROMPT HANDLING
+================================================================================
+
+Prompt Dialog:
+prompt("Enter Name")
+
+Normally:
+  User Types Something → Clicks OK
+
+Playwright:
+await alert.accept("Testleaf")
+
+Equivalent:
+  Enter Name: Testleaf → Click OK
+
+
+HIDDEN PLAYWRIGHT FEATURE
+================================================================================
+
+When you have:
+page.on("dialog", async (dialog) => {
+    await dialog.accept();
+})
+
+and an alert appears:
+
+Playwright:
+  Auto Pauses Execution → Handles Alert → Continues Test
+
+No explicit wait required.
+
+
+
+
+
+
+INTERVIEW ANSWER (Ready to Use)
+================================================================================
+
+"JavaScript alerts are browser-native dialogs that belong to the Browser
+Process and are not part of the DOM. Therefore, Playwright cannot interact
+with them using locators. Playwright listens for dialog events using
+page.on('dialog') or page.waitForEvent('dialog'). When a dialog appears,
+Playwright creates a Dialog object through which we can inspect the dialog
+type, message, and perform actions such as accept() or dismiss(). For
+single-alert scenarios, waitForEvent('dialog') is generally preferred, while
+page.on('dialog') is useful when multiple dialogs may appear during the test
+execution."
+
+
+QUICK REFERENCE TABLE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Method                    │ Purpose                                         │
+├───────────────────────────┼─────────────────────────────────────────────────┤
+│ alert.type()              │ Get dialog type (alert/confirm/prompt)          │
+│ alert.message()           │ Get displayed message text                      │
+│ alert.accept()            │ Click OK button                                 │
+│ alert.accept("text")      │ For prompt: enter text then click OK            │
+│ alert.dismiss()           │ Click Cancel button                             │
+│ page.on("dialog", fn)     │ Register persistent listener                    │
+│ page.waitForEvent()       │ Wait for single dialog (recommended)            │
+└───────────────────────────┴─────────────────────────────────────────────────┘
+
+================================================================================
+                    CLASSROOM ASSIGNMENT : AUTOMATING FRAME AND ALERT
+                    INTERACTIONS WITH TEXT VERIFICATION
+================================================================================
+
+LEARNING OBJECTIVE:
+--------------------------------------------------------------------------------
+Learn to automate interactions with frames, alerts, and verify text based on
+actions using Playwright.
+
+EXPECTED TIME:
+--------------------------------------------------------------------------------
+Best Case: 15 minutes
+Average Case: 20 minutes
+
+
+DETAILS:
+--------------------------------------------------------------------------------
+Automate interactions with frames, trigger alerts, and verify the displayed text
+based on actions using Playwright on the given application.
+
+PRECONDITION:
+--------------------------------------------------------------------------------
+- Launch the browser
+- Load the URL (https://www.w3schools.com/js/tryit.asp?filename=tryjs_confirm)
+- Switch to the frame
+- Ensure the webpage elements are fully loaded (Playwright auto-waits)
+
+
+REQUIREMENTS:
+--------------------------------------------------------------------------------
+1. Click the "Try It" button inside the frame
+2. Click OK / Cancel in the alert that appears
+3. Verify the action is performed correctly by validating the displayed text
+================================================================================
+                              END OF ASSIGNMENT
+================================================================================
+
+
+================================================================================
+part 2: TYPESCRIPT INTRODUCTION
+================================================================================
+
+TYPESCRIPT INSTALLATION COMMANDS
+================================================================================
+
+GLOBAL INSTALLATION:
+--------------------------------------------------------------------------------
+1. npm install typescript -g
+2. Check: tsc --version
+
+
+LOCAL PROJECT LEVEL INSTALLATION:
+--------------------------------------------------------------------------------
+npm install --save-dev typescript
+
+
+RUNNING .TS FILE DIRECTLY
+================================================================================
+
+Follow below steps to directly run a .ts file without compiling to JavaScript:
+
+STEP 1: Install ts-node globally
+--------------------------------------------------------------------------------
+npm install -g ts-node
+
+STEP 2: Initialize TypeScript configuration
+--------------------------------------------------------------------------------
+npx tsc --init  → This will create a default tsconfig.json
+
+STEP 3: Modify tsconfig.json
+--------------------------------------------------------------------------------
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
+    "types": ["node"],
+    "resolveJsonModule": true
+  }
+}
+
+STEP 4: Execute the file directly
+--------------------------------------------------------------------------------
+ts-node filename.ts
+
+================================================================================
+                         COMPILATION PROCESS
+================================================================================
+
+TRADITIONAL WAY:
+--------------------------------------------------------------------------------
+Step 1: tsc filename.ts  → Produces filename.js
+Step 2: node filename.js
+
+EASY WAY:
+--------------------------------------------------------------------------------
+npx ts-node filename.ts
+
+WHY:
+  • No manual compilation
+  • No JS generation
+  • Direct execution
+
+
+================================================================================
+WHY TYPESCRIPT IN AUTOMATION?
+================================================================================
+
+PROBLEM IN JAVASCRIPT:
+--------------------------------------------------------------------------------
+• No type checking
+• Errors found only during execution
+• Large frameworks become difficult to maintain
+
+SOLUTION:
+--------------------------------------------------------------------------------
+TypeScript introduces static typing.
+Errors are identified during compilation itself.
+
+REAL-TIME BENEFIT:
+--------------------------------------------------------------------------------
+• Prevents incorrect test data
+• Prevents framework misuse
+• Improves IntelliSense
+• Reduces flaky failures
+
+================================================================================
+THE TYPE SYSTEM
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+A set of rules that a type checker uses to assign types to your program.
+
+TWO KINDS OF TYPE SYSTEMS:
+--------------------------------------------------------------------------------
+1. Explicit syntax type systems (you tell TypeScript the type)
+2. Inferred type systems (TypeScript figures out the type automatically)
+
+
+TYPE ANNOTATIONS:
+--------------------------------------------------------------------------------
+To explicitly signal to TypeScript what your types are, use annotations.
+
+Syntax: value: type
+
+EXAMPLES:
+--------------------------------------------------------------------------------
+let a: number = 1           // a is a number
+let b: string = 'hello'     // b is a string
+let c: boolean[] = [true, false]  // c is an array of booleans
+
+
+TYPE INFERENCE:
+--------------------------------------------------------------------------------
+If you want TypeScript to infer your types for you, just leave them off:
+
+let a = 1                   // a is a number (inferred)
+let b = 'hello'             // b is a string (inferred)
+let c = [true, false]       // c is an array of booleans (inferred)
+
+
+
+================================================================================
+                         TYPESCRIPT DATA TYPES
+================================================================================
+
+1. number
+--------------------------------------------------------------------------------
+WHAT: Used to store numeric values.
+
+REAL-TIME EXAMPLE - Test Execution Count:
+--------------------------------------------------------------------------------
+let totalTests: number = 250;
+let passedTests: number = 245;
+let failedTests: number = 5;
+
+WHY: Execution metrics are always numeric.
+
+
+2. string
+--------------------------------------------------------------------------------
+WHAT: Used to store textual values.
+
+REAL-TIME EXAMPLE - Login Credentials:
+--------------------------------------------------------------------------------
+let username: string = "admin@testleaf.com";
+let password: string = "Test@123";
+
+WHY: Usernames, passwords, URLs and locator names are strings.
+
+
+3. boolean
+--------------------------------------------------------------------------------
+WHAT: Stores true or false.
+
+REAL-TIME EXAMPLE - Element Visibility Validation:
+--------------------------------------------------------------------------------
+let isLoginButtonVisible: boolean = true;
+
+PLAYWRIGHT EXAMPLE:
+--------------------------------------------------------------------------------
+const isVisible: boolean = await page.locator("#login").isVisible();
+
+WHY: Most validations produce true or false results.
+
+
+4. undefined
+--------------------------------------------------------------------------------
+WHAT: Variable declared but value not assigned.
+
+REAL-TIME EXAMPLE - Optional Test Data:
+--------------------------------------------------------------------------------
+let otp: string | undefined;
+
+WHY: OTP may not be available immediately.
+
+
+5. null
+--------------------------------------------------------------------------------
+WHAT: Represents intentional absence of value.
+
+REAL-TIME EXAMPLE - User Profile Data:
+--------------------------------------------------------------------------------
+let profilePicture: string | null = null;
+
+WHY: User has not uploaded a profile picture.
+
+
+6. any
+--------------------------------------------------------------------------------
+WHAT: Accepts any datatype.
+
+WHY: Useful when data structure is completely unknown.
+
+REAL-TIME EXAMPLE - Dynamic API Response:
+--------------------------------------------------------------------------------
+let response: any = await apiResponse.json();
+
+RISK:
+console.log(response.userName.toUpperCase());
+
+If API returns: { "userName": 12345 }
+
+Runtime Failure: toUpperCase is not a function
+
+INTERVIEW POINT:
+any disables TypeScript safety. Use only when absolutely required.
+
+
+7. unknown
+--------------------------------------------------------------------------------
+WHAT: Accepts any datatype but validation is mandatory.
+
+WHY: Safer alternative to any.
+
+REAL-TIME EXAMPLE - Third-Party API Response:
+--------------------------------------------------------------------------------
+let response: unknown = await apiResponse.json();
+
+Before Usage:
+--------------------------------------------------------------------------------
+if (typeof response === "object" && response !== null) {
+    console.log(response);
+}
+
+================================================================================
+TYPESCRIPT DATA TYPES - any vs unknown
+================================================================================
+
+✅ any — "Turn Off TypeScript"
+--------------------------------------------------------------------------------
+let data: any = "Message received from the server";
+data = 1234;
+data = true;
+
+data.toUpperCase();  // ✅ No error at compile time
+data.push(10);       // ✅ No error
+data();              // ✅ No error
+
+🔴 PROBLEM:
+TypeScript does not check anything on 'any'.
+Even wrong operations compile successfully, and your app crashes at runtime.
+
+So "any" means: "I don't care about type safety."
+
+
+✅ unknown — "Safe Version of any"
+--------------------------------------------------------------------------------
+let value: unknown;
+
+value = 40;
+value = "Hello";
+
+value.toUpperCase(); // ❌ ERROR (compile time)
+
+TypeScript blocks you here because: "I don't know what type this is yet."
+
+FIX - Type Checking:
+--------------------------------------------------------------------------------
+if (typeof value === "string") {
+    console.log(value.toUpperCase()); // ✅ Allowed
+}
+
+✅ Now TypeScript knows it is a string.
+✅ You proved the type — so it allows safe operations.
+
+
+REAL TIME EXAMPLE FOR "unknown" DATATYPE:
+--------------------------------------------------------------------------------
+Reusable Utility Functions
+
+Suppose you're building a common logger:
+
+function logData(data: unknown) {
+    if (typeof data === "string") {
+        console.log(data.toUpperCase());
+    }
+}
+
+If you use 'any', someone can pass: logData(123); and it crashes.
+With unknown, framework forces validation.
+
+
+================================================================================
+COMPARISON: any vs unknown
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Feature                    │ any                    │ unknown                │
+├────────────────────────────┼────────────────────────┼────────────────────────┤
+│ Type Safety                │ ❌ None                │ ✅ Required            │
+│ Compile-time Checking      │ ❌ Disabled            │ ✅ Enabled             │
+│ Can call any method        │ ✅ Yes (dangerous)     │ ❌ No (needs check)    │
+│ Runtime crashes            │ ⚠️ Possible            │ ✅ Prevented           │
+│ Framework recommendation   │ ❌ Avoid               │ ✅ Use for unknown data│
+└────────────────────────────┴────────────────────────┴────────────────────────┘
+
+
+
+
+8. never
+--------------------------------------------------------------------------------
+WHAT: Represents a function that never returns.
+
+WHY: Execution stops completely.
+
+DEFINITION:
+--------------------------------------------------------------------------------
+In Playwright, 'never' is used for functions that permanently stop a test when
+a critical failure happens.
+
+EXAMPLE 1 - Simple Beginner Example:
+--------------------------------------------------------------------------------
+function throwError(message: string): never {
+    throw new Error(message);
+}
+
+function checkNumber(num: number) {
+    if (num > 0) {
+        console.log("Positive number");
+    } else {
+        throwError("Number must be positive");
+    }
+}
+
+checkNumber(5);   // Output: Positive number
+checkNumber(-1);  // Throws Error: Number must be positive
+
+
+EXAMPLE 2 - Real Time Playwright Example:
+--------------------------------------------------------------------------------
+import { test, expect } from "@playwright/test";
+
+// A function that always stops the test
+function stopTest(message: string): never {
+    throw new Error(message);  // ❌ Test execution stops here
+}
+
+test("Login test with never example", async ({ page }) => {
+
+    await page.goto("http://leaftaps.com/opentaps/control/main");
+
+    const title = await page.title();
+
+    if (title !== "Login") {  // when the title value is false
+        stopTest("Login page did not load correctly"); // ✅ never
+    }
+
+    // ✅ This line runs ONLY if the title is correct
+    console.log("Test continues safely...");
+});
+
+
+KEY CHARACTERISTICS OF never:
+--------------------------------------------------------------------------------
+• Function NEVER returns a value
+• Function throws an exception OR
+• Function has infinite loop
+• Used for error handling functions
+• Indicates unreachable code after call
+
+
+
+9. tuple
+--------------------------------------------------------------------------------
+WHAT: Fixed-size array with fixed datatype order.
+
+WHY: Some data always follows a specific order.
+
+REAL-TIME EXAMPLE 1 - Login Credentials:
+--------------------------------------------------------------------------------
+let loginData: [string, string] = [
+    "admin@testleaf.com",
+    "Test@123"
+];
+
+Meaning:
+  Index 0 → Username
+  Index 1 → Password
+
+REAL-TIME EXAMPLE 2 - API Validation Result:
+--------------------------------------------------------------------------------
+let apiResult: [number, string, boolean] = [
+    200,
+    "Success",
+    true
+];
+
+Meaning:
+  Index 0 → Status Code
+  Index 1 → Message
+  Index 2 → Validation Result
+
+REAL-TIME EXAMPLE 3 - Execution Summary:
+--------------------------------------------------------------------------------
+let executionSummary: [string, number, number] = [
+    "Regression",
+    250,
+    245
+];
+
+Meaning:
+  Index 0 → Suite Name
+  Index 1 → Total Tests
+  Index 2 → Passed Tests
+
+
+
+
+================================================================================
+                         TODAY'S INTERVIEW SUMMARY
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Type        │ Usage                                                         │
+├─────────────┼───────────────────────────────────────────────────────────────┤
+│ number      │ Execution counts, status codes                                │
+│ string      │ Credentials, URLs, locators                                   │
+│ boolean     │ Validation results                                            │
+│ undefined   │ Value not assigned yet                                        │
+│ null        │ Intentionally empty value                                     │
+│ any         │ Completely unknown data (unsafe)                              │
+│ unknown     │ Unknown data requiring validation (safe)                      │
+│ never       │ Framework fail-fast methods                                   │
+│ tuple       │ Fixed-order data like credentials and API results             │
+└─────────────┴───────────────────────────────────────────────────────────────┘
+
+GOLDEN RULES:
+--------------------------------------------------------------------------------
+• Use unknown instead of any whenever possible
+• Use never for framework exceptions
+• Use tuple when order and datatype are fixed
+
+SUMMARY:
+  any     → Avoid when possible
+  unknown → Preferred for external data
+  never   → Used for fatal framework failures
+  tuple   → Used for fixed structured test data
+
+
+================================================================================
+                            DATA STRUCTURES  
+          (TypeScript + Real-Time Automation Framework Perspective)
+================================================================================
+
+1. WHAT IS A DATA STRUCTURE?
+================================================================================
+
+A Data Structure is a way of organizing and storing data so that it can be
+accessed, managed, and modified efficiently.
+
+REAL-TIME EXAMPLE:
+--------------------------------------------------------------------------------
+Instead of:
+let username = "admin";
+let password = "admin123";
+let url = "https://qa-app.com";
+
+Store related data together:
+const config = {
+    username: "admin",
+    password: "admin123",
+    url: "https://qa-app.com"
+}
+
+This improves maintainability and readability.
+
+
+2. WHY DO WE NEED DATA STRUCTURES?
+================================================================================
+
+WITHOUT DATA STRUCTURES:
+--------------------------------------------------------------------------------
+let empId1 = 101;
+let empId2 = 102;
+let empId3 = 103;
+
+Difficult to manage when data grows.
+
+WITH DATA STRUCTURES:
+--------------------------------------------------------------------------------
+const empIds = [101, 102, 103];
+
+Easy to: Add, Remove, Search, Sort, Iterate
+
+
+3. ARRAY
+================================================================================
+
+Stores multiple values in a single variable.
+
+const browsers = ["chrome", "edge", "firefox", "safari"];
+
+REAL-TIME AUTOMATION EXAMPLE - Store supported browsers:
+--------------------------------------------------------------------------------
+const browsers = ["chrome", "edge", "firefox", "safari"];
+
+Access: browsers[0]  // chrome
+
+FRAMEWORK USAGE:
+  • Test Data
+  • URLs
+  • Browser Names
+  • User Roles
+  • Expected Values
+
+
+4. OBJECT
+================================================================================
+
+Stores data as key-value pairs.
+
+const employee = {
+    empId: 882,
+    designation: "Sr.SDET"
+}
+
+REAL-TIME AUTOMATION EXAMPLE - Environment Configuration:
+--------------------------------------------------------------------------------
+const config = {
+    username: "DemoCSR",
+    password: "crmsfa",
+    url: "https://leaftaps.com"
+}
+
+FRAMEWORK USAGE:
+  • Config Files
+  • Test Data
+  • API Payloads
+  • Environment Settings
+
+
+5. NESTED OBJECT
+================================================================================
+
+Object inside another object.
+
+const empInfo = {
+    bhuvaneshInfo: {
+        empId: 882,
+        designation: "Sr.SDET"
+    },
+    vinothInfo: {
+        empId: 445,
+        designation: "SDET"
+    }
+}
+
+STRUCTURE:
+--------------------------------------------------------------------------------
+empInfo
+│
+├── bhuvaneshInfo
+│   ├── empId
+│   └── designation
+│
+└── vinothInfo
+    ├── empId
+    └── designation
+
+REAL-TIME AUTOMATION EXAMPLE - Multiple Environment Configurations:
+--------------------------------------------------------------------------------
+const environments = {
+    qa: {
+        url: "https://qa-app.com"
+    },
+    prod: {
+        url: "https://prod-app.com"
+    }
+}
+
+Access: environments.qa.url
+
+
+6. TYPE ALIAS
+================================================================================
+
+Used to create reusable custom types.
+
+WITHOUT TYPE ALIAS:
+--------------------------------------------------------------------------------
+bhuvaneshInfo: { empId: number, phno: number }
+vinothInfo: { empId: number, phno: number }
+
+Repeated structure.
+
+WITH TYPE ALIAS:
+--------------------------------------------------------------------------------
+type Employee = {
+    empId: number,
+    phno: number
+}
+
+Reuse:
+bhuvaneshInfo: Employee
+vinothInfo: Employee
+
+BENEFITS:
+  • Reusability
+  • Readability
+  • Maintainability
+  • Less duplication
+
+
+================================================================================
+                         INTERVIEW SUMMARY - DATA STRUCTURES
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concept         │ Description                        │ Framework Use        │
+├─────────────────┼────────────────────────────────────┼──────────────────────┤
+│ Array           │ Stores multiple values (index 0)   │ Test data, browser   │
+│                 │                                    │ lists                │
+│ Object          │ Key-value pairs                    │ Configs, payloads    │
+│ Nested Object   │ Object inside another object       │ Multi-environment    │
+│                 │                                    │ configs              │
+└─────────────────┴────────────────────────────────────┴──────────────────────┘
+
+
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
+
