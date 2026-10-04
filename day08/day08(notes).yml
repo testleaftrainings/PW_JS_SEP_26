@@ -1,0 +1,1211 @@
+📑 Agenda – Day 08 | TypeScript OOP's 
+
+================================================================================
+                    PLAYWRIGHT TEST ORGANIZATION, ANNOTATIONS & HOOKS
+================================================================================
+
+
+PART 1: INTRODUCTION TO PLAYWRIGHT TEST STRUCTURE
+================================================================================
+
+A Playwright test file is generally organized as follows:
+
+import { test, expect } from '@playwright/test';
+
+
+test.describe('Feature Name', () => {
+
+    // Variables
+
+    test.beforeAll(async () => {
+        // Runs once before all tests in this describe block
+    });
+
+    test.beforeEach(async ({ page }) => {
+        // Runs before every test in this describe block
+    });
+
+    test('Test Case 1', async ({ page }) => {
+        // Test implementation
+    });
+
+    test('Test Case 2', async ({ page }) => {
+        // Test implementation
+    });
+
+    test.afterEach(async () => {
+        // Runs after every test in this describe block
+    });
+
+    test.afterAll(async () => {
+        // Runs once after all tests in this describe block
+    });
+
+});
+
+This structure is followed in most enterprise Playwright frameworks.
+
+
+================================================================================
+PART 2: test.describe()
+================================================================================
+
+WHAT IS IT?
+--------------------------------------------------------------------------------
+test.describe() groups related test cases into a logical suite.
+
+test.describe('Lead Management', () => {
+    test('Create Lead', async () => { });
+    test('Edit Lead', async () => { });
+});
+
+WHY DO WE USE IT?
+--------------------------------------------------------------------------------
+• Organize tests by feature/module
+• Scope hooks (beforeAll, beforeEach, etc.)
+• Apply common tags and annotations
+• Improve report readability
+
+CAN WE NEST test.describe()?
+--------------------------------------------------------------------------------
+✅ YES.
+
+test.describe('Lead Module', () => {
+    test.describe('Create Lead', () => {
+        test('Mandatory Fields');
+        test('Optional Fields');
+    });
+});
+
+CAN WE NEST test()?
+--------------------------------------------------------------------------------
+❌ NO.
+
+test('Create Lead', async () => {
+    test('Delete Lead');   // Invalid
+});
+
+Reason: Playwright discovers all tests before execution. Tests cannot be created
+dynamically during another test.
+
+INTERVIEW QUESTION:
+Q: Can we nest one test() inside another?
+A: No. Only test.describe() supports nesting.
+
+
+================================================================================
+PART 3: PLAYWRIGHT ANNOTATIONS
+================================================================================
+
+Annotations control test execution or add metadata to reports.
+
+BUILT-IN ANNOTATIONS:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Annotation     │ Purpose                                                    │
+├────────────────┼────────────────────────────────────────────────────────────┤
+│ test.only()    │ Run only selected tests                                    │
+│ test.skip()    │ Skip a test                                                │
+│ test.fail()    │ Expected to fail                                           │
+│ test.fixme()   │ Known broken test (does not execute)                      │
+│ test.slow()    │ Triple the timeout                                         │
+└────────────────┴────────────────────────────────────────────────────────────┘
+
+test.only():
+--------------------------------------------------------------------------------
+Runs only the focused test.
+
+test.only('Create Lead', async () => { });
+
+test.skip():
+--------------------------------------------------------------------------------
+Skips execution.
+
+test.skip('Delete Lead', async () => { });
+
+Conditional Skip:
+test('Delete Lead', async ({ browserName }) => {
+    test.skip(browserName === 'firefox');
+});
+
+test.fail():
+--------------------------------------------------------------------------------
+Runs the test but expects it to fail.
+
+test.fail('Known Bug', async () => { });
+
+test.fixme():
+--------------------------------------------------------------------------------
+Marks a test as broken. The test will NOT execute.
+
+test.fixme('Feature under development', async () => { });
+
+test.slow():
+--------------------------------------------------------------------------------
+Triples the timeout for this test.
+
+test.slow();
+test('Large File Upload', async () => { });
+
+DIFFERENCE BETWEEN skip, fail, fixme:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ skip            │ fail                │ fixme                              │
+├─────────────────┼─────────────────────┼────────────────────────────────────┤
+│ Doesn't execute │ Executes            │ Doesn't execute                    │
+│ Not applicable  │ Expected failure    │ Known broken feature               │
+└─────────────────┴─────────────────────┴────────────────────────────────────┘
+
+INTERVIEW QUESTIONS:
+• Difference between skip, fail, and fixme?
+• When would you use test.fail() instead of test.skip()?
+
+
+================================================================================
+PART 4: TAGS
+================================================================================
+
+Tags categorize tests.
+
+SYNTAX:
+test('Create Lead', { tag: '@smoke' }, async () => { });
+
+Multiple tags:
+tag: ['@smoke', '@regression']
+
+RUN TAGGED TESTS:
+npx playwright test --grep @smoke
+
+EXCLUDE TAGS:
+npx playwright test --grep-invert @smoke
+
+GROUP TAGS:
+test.describe(
+    'Lead Module',
+    { tag: '@crm' },
+    () => {
+        // Every test inherits the tag
+    }
+);
+
+INTERVIEW QUESTIONS:
+• What is the purpose of tags?
+• How do you execute only Smoke tests?
+
+
+================================================================================
+PART 5: CUSTOM ANNOTATIONS
+================================================================================
+
+Metadata shown in reports.
+
+SYNTAX:
+test(
+    'Create Lead',
+    {
+        annotation: {
+            type: 'issue',
+            description: 'JIRA-101'
+        }
+    },
+    async () => { }
+);
+
+RUNTIME ANNOTATION:
+testInfo.annotations.push({
+    type: 'test_case',
+    description: 'TC-101'
+});
+
+INTERVIEW QUESTIONS:
+• Difference between Tags and Annotations?
+• Why use runtime annotations?
+
+
+================================================================================
+PART 6: test.step()
+================================================================================
+
+Groups actions inside a test.
+
+SYNTAX:
+await test.step('Login', async () => { });
+
+WHY USE IT?
+--------------------------------------------------------------------------------
+Improves HTML reports.
+
+Without step:
+  Create Lead
+
+With step:
+  Create Lead
+      Login
+      Open CRM
+      Create Lead
+      Verify Success
+
+NESTED STEPS (Allowed):
+await test.step('Create Lead', async () => {
+    await test.step('Fill Details', async () => { });
+});
+
+RETURNING VALUES:
+const id = await test.step('Get Lead Id', async () => {
+    return '1001';
+});
+
+BOX OPTION:
+await test.step(
+    'Login',
+    async () => { },
+    { box: true }
+);
+
+Useful in Page Object Models to report failures at the business-step level.
+
+INTERVIEW QUESTIONS:
+• Where do you use test.step() in projects?
+• Can test.step() be nested?
+• What is box: true?
+
+
+================================================================================
+PART 7: HOOKS
+================================================================================
+
+Playwright provides four hooks.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Hook           │ Executes                                                   │
+├────────────────┼────────────────────────────────────────────────────────────┤
+│ beforeAll()    │ Once before all tests                                      │
+│ beforeEach()   │ Before every test                                          │
+│ afterEach()    │ After every test                                           │
+│ afterAll()     │ Once after all tests                                       │
+└────────────────┴────────────────────────────────────────────────────────────┘
+----------------
+EXECUTION FLOW:
+beforeAll()
+    ↓
+beforeEach()
+    ↓
+Test1
+    ↓
+afterEach()
+    ↓
+beforeEach()
+    ↓
+Test2
+    ↓
+afterEach()
+    ↓
+afterAll()
+----------------
+
+
+beforeAll():
+--------------------------------------------------------------------------------
+Runs once before all tests.
+
+Used for:
+  • Create shared data
+  • API Authentication
+  • Database setup
+  • Generate token
+
+beforeEach():
+--------------------------------------------------------------------------------
+Runs before every test.
+
+Used for:
+  • Login
+  • Launch application
+  • Navigate to Home Page
+
+afterEach():
+--------------------------------------------------------------------------------
+Runs after every test.
+
+Used for:
+  • Logout
+  • Screenshot on failure
+  • Clean up test data
+  • Close dialogs
+
+afterAll():
+--------------------------------------------------------------------------------
+Runs once after all tests.
+
+Used for:
+  • Delete created data
+  • Close database connections
+  • Release shared resources
+
+SCOPE:
+--------------------------------------------------------------------------------
+Hooks declared inside test.describe() apply only to that group.
+
+MULTIPLE HOOKS:
+--------------------------------------------------------------------------------
+Hooks execute in the order they are declared.
+
+test.beforeEach(Hook1);
+test.beforeEach(Hook2);
+
+Execution: Hook1 → Hook2 → Test
+
+INTERVIEW QUESTIONS:
+• Difference between beforeAll() and beforeEach()?
+• Can hooks use fixtures?
+• Can hooks be scoped to a group?
+• What happens if multiple beforeEach() hooks are declared?
+
+
+================================================================================
+PART 8: MAPPING TESTNG TO PLAYWRIGHT
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TestNG               │ Playwright                                           │
+├──────────────────────┼──────────────────────────────────────────────────────┤
+│ @BeforeSuite         │ Global Setup (globalSetup.ts)                        │
+│ @AfterSuite          │ Global Teardown (globalTeardown.ts)                  │
+│ @BeforeTest          │ beforeAll()                                          │
+│ @AfterTest           │ afterAll()                                           │
+│ @BeforeClass         │ beforeAll()                                          │
+│ @AfterClass          │ afterAll()                                           │
+│ @BeforeMethod        │ beforeEach()                                         │
+│ @AfterMethod         │ afterEach()                                          │
+│ @Test                │ test()                                               │
+│ enabled = false      │ test.skip()                                          │
+│ priority             │ Not supported                                        │
+│ DataProvider         │ Arrays + forEach() / test.describe.parallel()        │
+└──────────────────────┴──────────────────────────────────────────────────────┘
+
+
+================================================================================
+PART 9: ENTERPRISE PROJECT STRUCTURE
+================================================================================
+
+LeadManagement.spec.ts
+
+test.describe('Lead Module')
+        │
+        ├── Tags (@crm, @regression)
+        ├── Annotations (JIRA, TC, etc.)
+        ├── Variables (shared test data)
+        ├── beforeAll() (Setup: API auth, generate token)
+        ├── beforeEach() (Login, navigate to page)
+        ├── Test 1 (Create Lead)
+        ├── Test 2 (Edit Lead)
+        ├── Test 3 (Delete Lead)
+        ├── afterEach() (Cleanup, screenshot on failure)
+        └── afterAll() (Delete created data, close connections)
+
+
+================================================================================
+PART 10: MOST ASKED INTERVIEW QUESTIONS
+================================================================================
+
+ABOUT test.describe():
+--------------------------------------------------------------------------------
+• What is test.describe()?
+• Why do we use it?
+• Can we nest test.describe()?
+• Can we nest test()?
+
+ABOUT ANNOTATIONS:
+--------------------------------------------------------------------------------
+• Explain test.only()
+• Difference between skip, fail, and fixme
+• What does test.slow() do?
+• Difference between Tags and Annotations?
+• How do you run tagged tests?
+• What are runtime annotations?
+
+ABOUT test.step():
+--------------------------------------------------------------------------------
+• What is test.step()?
+• Why do we use it in projects?
+• Can test.step() return a value?
+• Can test.step() be nested?
+• What is the purpose of box: true?
+
+ABOUT HOOKS:
+--------------------------------------------------------------------------------
+• Explain all Playwright hooks
+• Difference between beforeAll() and beforeEach()
+• Difference between afterEach() and afterAll()
+• Can hooks access fixtures?
+• What happens if multiple hooks are declared?
+• What's the difference between file-level and group-level hooks?
+
+ABOUT TESTNG MIGRATION:
+--------------------------------------------------------------------------------
+• How do TestNG annotations map to Playwright?
+• How do you replace @DataProvider in Playwright?
+• Does Playwright support test priorities?
+
+
+================================================================================
+QUICK REVISION
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concept                    │ Summary                                        │
+├────────────────────────────┼────────────────────────────────────────────────┤
+│ test.describe()            │ Group tests by feature/module                  │
+│ test.only()                │ Run only selected tests                        │
+│ test.skip()                │ Skip test execution                            │
+│ test.fail()                │ Expect test to fail                            │
+│ test.fixme()               │ Known broken test (doesn't execute)            │
+│ test.slow()                │ Triple timeout for slow tests                  │
+│ Tags                       │ Categorize tests (@smoke, @regression)         │
+│ test.step()                │ Group actions within a test                    │
+│ beforeAll()                │ Once before all tests                          │
+│ beforeEach()               │ Before every test                              │
+│ afterEach()                │ After every test                               │
+│ afterAll()                 │ Once after all tests                           │
+│ box: true                  │ Boxed step (better error reporting)            │
+└────────────────────────────┴────────────────────────────────────────────────┘
+================================================================================
+
+================================================================================
+                            DATA STRUCTURES  
+          (TypeScript + Real-Time Automation Framework Perspective)
+================================================================================
+
+1. WHAT IS A DATA STRUCTURE?
+================================================================================
+
+A Data Structure is a way of organizing and storing data so that it can be
+accessed, managed, and modified efficiently.
+
+REAL-TIME EXAMPLE:
+--------------------------------------------------------------------------------
+Instead of:
+let username = "admin";
+let password = "admin123";
+let url = "https://qa-app.com";
+
+Store related data together:
+const config = {
+    username: "admin",
+    password: "admin123",
+    url: "https://qa-app.com"
+}
+
+This improves maintainability and readability.
+
+
+2. WHY DO WE NEED DATA STRUCTURES?
+================================================================================
+
+WITHOUT DATA STRUCTURES:
+--------------------------------------------------------------------------------
+let empId1 = 101;
+let empId2 = 102;
+let empId3 = 103;
+
+Difficult to manage when data grows.
+
+WITH DATA STRUCTURES:
+--------------------------------------------------------------------------------
+const empIds = [101, 102, 103];
+
+Easy to: Add, Remove, Search, Sort, Iterate
+
+
+3. ARRAY
+================================================================================
+
+Stores multiple values in a single variable.
+
+const browsers = ["chrome", "edge", "firefox", "safari"];
+
+REAL-TIME AUTOMATION EXAMPLE - Store supported browsers:
+--------------------------------------------------------------------------------
+const browsers = ["chrome", "edge", "firefox", "safari"];
+
+Access: browsers[0]  // chrome
+
+FRAMEWORK USAGE:
+  • Test Data
+  • URLs
+  • Browser Names
+  • User Roles
+  • Expected Values
+
+
+4. OBJECT
+================================================================================
+
+Stores data as key-value pairs.
+
+const employee = {
+    empId: 882,
+    designation: "Sr.SDET"
+}
+
+REAL-TIME AUTOMATION EXAMPLE - Environment Configuration:
+--------------------------------------------------------------------------------
+const config = {
+    username: "DemoCSR",
+    password: "crmsfa",
+    url: "https://leaftaps.com"
+}
+
+FRAMEWORK USAGE:
+  • Config Files
+  • Test Data
+  • API Payloads
+  • Environment Settings
+
+
+5. NESTED OBJECT
+================================================================================
+
+Object inside another object.
+
+const empInfo = {
+    bhuvaneshInfo: {
+        empId: 882,
+        designation: "Sr.SDET"
+    },
+    vinothInfo: {
+        empId: 445,
+        designation: "SDET"
+    }
+}
+
+STRUCTURE:
+--------------------------------------------------------------------------------
+empInfo
+│
+├── bhuvaneshInfo
+│   ├── empId
+│   └── designation
+│
+└── vinothInfo
+    ├── empId
+    └── designation
+
+REAL-TIME AUTOMATION EXAMPLE - Multiple Environment Configurations:
+--------------------------------------------------------------------------------
+const environments = {
+    qa: {
+        url: "https://qa-app.com"
+    },
+    prod: {
+        url: "https://prod-app.com"
+    }
+}
+
+Access: environments.qa.url
+
+================================================================================
+                    DATA PARAMETERIZATION IN PLAYWRIGHT
+                       (JSON + CSV + ENVIRONMENT)
+================================================================================
+
+
+INTRODUCTION
+================================================================================
+
+Parameterization is one of those ideas that sounds fancy but is actually very
+human logic:
+
+  "Run the same behavior with different inputs without rewriting the test."
+
+Instead of writing ten tests that differ only by data, you write one test + many
+data values. Automation stops being copy-paste and starts behaving like a
+scientific experiment: same procedure, different variables.
+
+SIMPLE REAL-WORLD ANALOGY:
+--------------------------------------------------------------------------------
+Imagine testing a login page.
+
+Without Parameterization:
+  Test login with user1
+  Test login with user2
+  Test login with user3
+
+That's repetition disguised as productivity.
+
+With Parameterization:
+  One login test → run with multiple usernames/passwords
+
+Same logic. Different data.
+
+WHY PARAMETERIZATION MATTERS (Real Engineering Reason):
+--------------------------------------------------------------------------------
+WITHOUT IT:
+  • Duplicated tests
+  • Maintenance nightmare
+  • Bug fixes repeated everywhere
+
+WITH IT:
+  • One logic source
+  • Unlimited test coverage
+  • Cleaner reporting
+
+You change logic once → affects all datasets.
+
+PARAMETERIZATION METHODS IN PLAYWRIGHT:
+================================================================================
+  Method 1 — Parameterization using JSON file
+  Method 2 — Parameterization using CSV/Excel file
+  Method 3 — Environment parameterization (Dev, QA, UAT, Prod)
+
+
+================================================================================
+                    METHOD 1: DATA PARAMETERIZATION WITH JSON
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Feeding test data from external JSON files instead of hardcoding values.
+Useful for data-driven testing.
+
+WHAT IS JSON?
+--------------------------------------------------------------------------------
+JSON = JavaScript Object Notation
+A text format for structured data that humans & machines both love.
+
+JSON BUILDING BLOCKS:
+--------------------------------------------------------------------------------
+  {}  → Objects  → { key: value }
+  []  → Arrays   → [ value1, value2 ]
+  ""  → Strings  → "name": "Bhuvi"
+  num → Numbers  → 7
+  bool→ Boolean  → true
+  null→ null     → null
+
+No functions. No logic. Just pure data. — That's the magic!
+
+WHY JSON WON:
+--------------------------------------------------------------------------------
+┌────────────────────────────────────────────────────────────────────────────┐
+│ Reason                    │ Why It Mattered                                │
+├───────────────────────────┼────────────────────────────────────────────────┤
+│ Perfect Timing            │ Web apps needed constant server chat           │
+│ Native to JS              │ JSON.parse(data) — instant objects!            │
+│ Human-readable            │ Debug by looking — no archaeology required     │
+│ Language-agnostic         │ Java, Python, C#, Rust — everyone speaks JSON  │
+│ API Perfect               │ REST APIs became JSON machines                 │
+└───────────────────────────┴────────────────────────────────────────────────┘
+
+WHERE YOU SEE JSON DAILY:
+--------------------------------------------------------------------------------
+  • Playwright Tests → API responses
+  • Config Files → package.json, tsconfig.json
+  • Auth → Storage state, tokens
+  • Cloud → Microservices chat
+  • Databases → NoSQL, exports
+
+SAMPLE JSON STRUCTURE (testData.json):
+--------------------------------------------------------------------------------
+[
+  {
+    "TcaseId": "TC001",
+    "Username": "democsr",
+    "Password": "crmsfa"
+  },
+  {
+    "TcaseId": "TC002",
+    "Username": "democsr2",
+    "Password": "crmsfa"
+  }
+]
+
+STEP-BY-STEP PROCESS FOR JSON:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 1: Create JSON File                                                    │
+│   → Create a .json file inside the Data folder                             │
+│   → Define test data in JSON format                                        │
+│   → Use array of objects for multiple test cases                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 2: Import JSON into Spec File                                          │
+│   → Create a .spec.ts file                                                 │
+│   → Import data using:                                                     │
+│     import * as testData from "./Data/xxx.json";                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 3: Use in Test Cases                                                   │
+│   → Loop through imported data                                             │
+│   → Access values using keys                                               │
+│   → Example: testData[0].Username                                          │
+│   → Perform validations with test data                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 4: Run the Test                                                        │
+│   → Execute the spec file                                                  │
+│   → Test runs multiple times with different data                           │
+│   → Observe data-driven testing in action                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+QUICK CODE REFERENCE:
+--------------------------------------------------------------------------------
+import credentials from "./Data/loginData.json";
+
+test.describe("Data Driven Login Test", () => {
+  for (const data of credentials) {
+    test(`Test ${data.TcaseId} with ${data.Username}`, async ({ page }) => {
+      await page.fill('#username', data.Username);
+      await page.fill('#password', data.Password);
+      await page.click('#loginBtn');
+    });
+  }
+});
+
+BENEFITS OF JSON PARAMETERIZATION:
+--------------------------------------------------------------------------------
+  ✓ No hardcoded values in test scripts
+  ✓ Easy to add/modify test data
+  ✓ Separate data from test logic
+  ✓ Reuse same test with multiple datasets
+  ✓ Perfect for regression testing
+
+
+================================================================================
+                    METHOD 2: DATA PARAMETERIZATION WITH CSV
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+CSV = Comma Separated Values
+A plain text format for tabular data, commonly used for business data and
+Excel exports.
+
+WHY CSV NEEDS INSTALLATION (Unlike JSON):
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CSV file content:                                                          │
+│ ┌──────────────────────┐                                                   │
+│ │ username,password    │                                                   │
+│ │ demo,123             │                                                   │
+│ │ admin,456            │                                                   │
+│ └──────────────────────┘                                                   │
+│                                                                             │
+│ ❌ Node.js does NOT automatically know:                                     │
+│    • Where columns start/end                                               │
+│    • Where rows begin                                                      │
+│    • How to handle commas inside values                                    │
+│    • How to handle quoted values                                           │
+│    • Which row maps to headers                                             │
+│                                                                             │
+│ → CSV = Just plain text file                                               │
+│ → PACKAGE NEEDED to parse correctly                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+INSTALLATION:
+--------------------------------------------------------------------------------
+npm install csv-parse
+
+WHY TWO IMPORTS FOR CSV?
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ IMPORT 1: fs (File System)                                                  │
+│   import fs from "fs";                                                     │
+│   fs.readFileSync("./data/login.csv")                                      │
+│   → Reads file from system → brings content into code                     │
+│   → WITHOUT fs → File content never reaches your script                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ IMPORT 2: parse (CSV Parser)                                               │
+│   import { parse } from "csv-parse/sync";                                 │
+│   → Converts RAW TEXT → USABLE OBJECTS:                                   │
+│                                                                             │
+│   INPUT (Raw CSV):           OUTPUT (Array of Objects):                    │
+│   ┌─────────────────┐        ┌─────────────────────────┐                   │
+│   │ username,pass   │   →    │ { username:"demo",       │                   │
+│   │ demo,123        │        │   password:"123" }       │                   │
+│   └─────────────────┘        └─────────────────────────┘                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+STEP-BY-STEP PROCESS FOR CSV:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STEP 1: Install csv-parse package                                           │
+│   npm install csv-parse                                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 2: Import Dependencies                                                 │
+│   import { parse } from "csv-parse/sync";                                  │
+│   import fs from "fs";                                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 3: Read CSV File                                                       │
+│   fs.readFileSync("Data/login.csv")                                        │
+│   → Reads raw CSV content from Data folder                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 4: Parse CSV Content                                                   │
+│   parse(content, { columns: true, skip_empty_lines: true })                │
+│   → First row = column names                                               │
+│   → Ignore blank rows                                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 5: Store in Variable                                                   │
+│   Store parsed result in 'records' variable                                │
+│   Each row becomes a JavaScript object                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ STEP 6: Use in Tests                                                        │
+│   Loop through records array                                               │
+│   Access values using column names                                         │
+│   Example: records[0].username, records[0].password                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CSV → JSON CONVERSION EXAMPLE:
+--------------------------------------------------------------------------------
+INPUT CSV:
+┌──────┬──────────────────┬──────────┐
+│ tcid │ username         │ password │
+├──────┼──────────────────┼──────────┤
+│ 1    │ demoSalesmanager │ crmsfa   │
+│ 2    │ demoCSR          │ crmsfa   │
+└──────┴──────────────────┴──────────┘
+
+OUTPUT JSON (RECORDS):
+[
+  { tcid: "1", username: "demoSalesmanager", password: "crmsfa" },
+  { tcid: "2", username: "demoCSR", password: "crmsfa" }
+]
+
+QUICK CODE REFERENCE:
+--------------------------------------------------------------------------------
+import { parse } from "csv-parse/sync";
+import fs from "fs";
+
+let records = parse(
+  fs.readFileSync("Data/login.csv"),
+  { columns: true, skip_empty_lines: true }
+);
+
+// Access: records[0].username → "demoSalesmanager"
+// Access: records[1].password → "crmsfa"
+
+USING IN TESTS:
+--------------------------------------------------------------------------------
+import { test } from '@playwright/test';
+import fs from 'fs';
+import { parse } from 'csv-parse/sync';
+
+const records = parse(
+  fs.readFileSync('Data/login.csv'),
+  { columns: true, skip_empty_lines: true }
+);
+
+for (const record of records) {
+  test(`Login with ${record.username}`, async ({ page }) => {
+    await page.goto('https://example.com/login');
+    await page.fill('#username', record.username);
+    await page.fill('#password', record.password);
+    await page.click('#login');
+  });
+}
+
+JSON vs CSV COMPARISON:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FORMAT  │ NATIVE TO NODE?   │ WHAT'S NEEDED?        │ BEST FOR              │
+├─────────┼───────────────────┼───────────────────────┼───────────────────────┤
+│ JSON    │ ✅ YES            │ Just import directly  │ API testing, configs  │
+│ CSV     │ ❌ NO             │ fs + parse package    │ Business data, Excel  │
+└─────────┴───────────────────┴───────────────────────┴───────────────────────┘
+
+================================================================================
+		 STORAGE STATE (AUTHENTICATION PERSISTENCE)
+================================================================================
+
+WHAT IS A BROWSER CONTEXT?
+--------------------------------------------------------------------------------
+A BrowserContext is an isolated browser profile.
+
+Think:
+  Chrome Profile A → cookies + localStorage + sessionStorage
+  Chrome Profile B → completely separate identity
+
+In Playwright:
+const context = await browser.newContext();
+
+Each context has its own:
+  • cookies
+  • localStorage
+  • sessionStorage
+  • authentication tokens
+
+Basically → its own "user".
+
+WHAT storageState() ACTUALLY DOES:
+--------------------------------------------------------------------------------
+await context.storageState({ path: 'auth.json' });
+
+This command says:
+  "Take everything that proves this user is logged in and serialize it into a file."
+
+It captures:
+  ✓ Cookies
+  ✓ Local Storage
+  ✓ Session Storage (origins-based)
+
+It does NOT save DOM, tabs, or UI state.
+Only authentication-related browser storage.
+
+WHAT GETS SAVED (Real Example):
+--------------------------------------------------------------------------------
+{
+  "cookies": [
+    {
+      "name": "session_id",
+      "value": "abc123",
+      "domain": ".example.com"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://example.com",
+      "localStorage": [
+        { "name": "token", "value": "jwt-token-value" }
+      ]
+    }
+  ]
+}
+
+This is literally your logged-in identity bottled into JSON.
+
+HOW IT WORKS INTERNALLY:
+--------------------------------------------------------------------------------
+When you log in:
+  Username + Password → Server validates → Server sends cookie/token → Browser stores it
+
+Next requests automatically include that cookie/token.
+
+Playwright simply exports those stored credentials.
+No magic. Just smart persistence.
+
+TYPICAL WORKFLOW (Industry Standard):
+--------------------------------------------------------------------------------
+Step 1 — Login once (Run this only once):
+await page.context().storageState({ path: 'auth.json' });
+
+Step 2 — Reuse login everywhere:
+test.use({ storageState: 'auth.json' });
+  Browser opens already authenticated.
+  No login steps executed.
+
+IMPORTANT SUBTLE DETAIL:
+--------------------------------------------------------------------------------
+Storage state is tied to:
+  • domain
+  • cookie scope
+  • same-origin policy
+
+If your app redirects to another domain (SSO like Microsoft login), storage must
+include those domains too. Otherwise authentication appears "lost".
+
+COMMON MISUNDERSTANDING:
+--------------------------------------------------------------------------------
+People think this saves session like a snapshot.
+It doesn't.
+
+It saves credentials, not the browser state.
+
+So:
+  open tabs ❌
+  scroll position ❌
+  UI elements ❌
+  login tokens ✅
+
+
+================================================================================
+================================================================================
+                    LOCAL STORAGE vs SESSION STORAGE vs COOKIES
+================================================================================
+
+
+COMPARISON TABLE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Feature                      │ Local Storage │ Session Storage │ Cookies    │
+├──────────────────────────────┼───────────────┼─────────────────┼────────────┤
+│ Storage Limit                │ ~5–10 MB      │ ~5 MB           │ ~4 KB      │
+│ Lifetime                     │ Until explici-│ Until browser   │ Until expi-│
+│                              │ tly deleted   │ tab is closed   │ ry time    │
+│ Shared Across Tabs           │ ✅ Yes        │ ❌ No           │ ✅ Yes     │
+│                              │ (same origin) │ (per tab)       │ (same do-  │
+│                              │               │                 │ main/path) │
+│ Sent with Every HTTP Request │ ❌ No         │ ❌ No           │ ✅ Yes     │
+│ Accessible via JavaScript    │ ✅ Yes        │ ✅ Yes          │ ✅ Only    │
+│                              │               │                 │ non-HttpOn-│
+│                              │               │                 │ ly cookies │
+│ Can be HttpOnly              │ ❌ No         │ ❌ No           │ ✅ Yes     │
+│ Used for Authentication      │ Sometimes     │ Rarely          │ ✅ Very    │
+│                              │               │                 │ common     │
+│ Playwright storageState()    │ ✅ Captured   │ ❌ Not captured │ ✅ Captured│
+└──────────────────────────────┴───────────────┴─────────────────┴────────────┘
+
+
+DETAILED EXPLANATIONS
+================================================================================
+
+STORAGE LIMIT:
+--------------------------------------------------------------------------------
+Local Storage: ~5–10 MB (depends on browser)
+Session Storage: ~5 MB
+Cookies: ~4 KB per cookie (20–50 cookies per domain)
+
+LIFETIME:
+--------------------------------------------------------------------------------
+Local Storage: Data persists until explicitly deleted by JavaScript or user
+Session Storage: Data cleared when the browser tab is closed
+Cookies: Data persists until the expiry date set in the cookie (or session ends)
+
+SHARED ACROSS TABS:
+--------------------------------------------------------------------------------
+Local Storage: ✅ Yes — shared across all tabs with the same origin
+Session Storage: ❌ No — each tab has its own isolated storage
+Cookies: ✅ Yes — shared across all tabs with the same domain/path
+
+SENT WITH EVERY HTTP REQUEST:
+--------------------------------------------------------------------------------
+Local Storage: ❌ Not sent automatically (must be added manually)
+Session Storage: ❌ Not sent automatically (must be added manually)
+Cookies: ✅ Yes — automatically sent with every request to the domain
+
+ACCESSIBLE VIA JAVASCRIPT:
+--------------------------------------------------------------------------------
+Local Storage: ✅ Yes — accessible via localStorage API
+Session Storage: ✅ Yes — accessible via sessionStorage API
+Cookies: ✅ Only non-HttpOnly cookies (HttpOnly cookies cannot be read by JS)
+
+CAN BE HTTPONLY:
+--------------------------------------------------------------------------------
+Local Storage: ❌ No — always accessible via JavaScript
+Session Storage: ❌ No — always accessible via JavaScript
+Cookies: ✅ Yes — HttpOnly flag prevents JavaScript access (security)
+
+USED FOR AUTHENTICATION:
+--------------------------------------------------------------------------------
+Local Storage: Sometimes — used for JWT tokens in SPA
+Session Storage: Rarely — mostly used for temporary session data
+Cookies: ✅ Very common — traditional session-based auth
+
+PLAYWRIGHT storageState():
+--------------------------------------------------------------------------------
+Local Storage: ✅ Captured — includes all localStorage data
+Session Storage: ❌ Not captured — session-specific data not persisted
+Cookies: ✅ Captured — includes all cookies
+
+
+================================================================================
+                    PLAYWRIGHT CODE EXAMPLES
+================================================================================
+
+ACCESSING LOCAL STORAGE:
+--------------------------------------------------------------------------------
+// Get all localStorage items
+const localStorageData = await page.evaluate(() => ({ ...localStorage }));
+
+// Get specific item
+const token = await page.evaluate(() => localStorage.getItem('authToken'));
+
+// Set item
+await page.evaluate(() => {
+    localStorage.setItem('theme', 'dark');
+});
+
+ACCESSING SESSION STORAGE:
+--------------------------------------------------------------------------------
+// Get all sessionStorage items
+const sessionData = await page.evaluate(() => ({ ...sessionStorage }));
+
+// Get specific item
+const sessionId = await page.evaluate(() => sessionStorage.getItem('sessionId'));
+
+// Set item
+await page.evaluate(() => {
+    sessionStorage.setItem('cartData', JSON.stringify({ items: 3 }));
+});
+
+ACCESSING COOKIES:
+--------------------------------------------------------------------------------
+// Get all cookies
+const cookies = await context.cookies();
+
+// Get cookies for a specific URL
+const cookies = await context.cookies(['https://example.com']);
+
+// Get specific cookie
+const cookies = await context.cookies();
+const authCookie = cookies.find(c => c.name === 'session_id');
+
+
+================================================================================
+                    INTERVIEW QUESTION & ANSWER
+================================================================================
+
+Q: Why do we use ...localStorage inside page.evaluate()?
+
+A: localStorage is a browser Storage object, not a plain JavaScript object.
+   Playwright can only transfer serializable values from the browser context
+   back to the Node.js test context.
+
+   localStorage is a special browser object with methods like getItem(), setItem(),
+   and removeItem(). It is NOT a plain object with key-value pairs directly
+   enumerable in a standard JavaScript way.
+
+   Using the spread operator (...localStorage) copies all key-value pairs into
+   a new plain object, making the data serializable and easy to inspect or use
+   in the test.
+
+EXPLANATION:
+--------------------------------------------------------------------------------
+// ❌ This returns a Storage object (not directly usable in Node.js)
+const storage = await page.evaluate(() => localStorage);
+console.log(storage); // Storage object with methods
+
+// ✅ This returns a plain serializable object
+const storage = await page.evaluate(() => ({ ...localStorage }));
+console.log(storage); // { 'key1': 'value1', 'key2': 'value2' }
+
+// ✅ Alternative: JSON.stringify
+const storage = await page.evaluate(() => JSON.stringify(localStorage));
+const data = JSON.parse(storage);
+
+WHY SERIALIZATION MATTERS:
+--------------------------------------------------------------------------------
+Playwright uses a process called "serialization" to transfer data between:
+  • Browser context (where page.evaluate() runs)
+  • Node.js context (where your test runs)
+
+Only JSON-serializable values can be transferred:
+  ✓ Strings, Numbers, Booleans, null
+  ✓ Arrays and Objects (plain key-value)
+  ✗ Functions (cannot be serialized)
+  ✗ DOM Elements (cannot be serialized)
+  ✗ Special objects like Storage (cannot be serialized directly)
+
+COMMON PATTERN:
+--------------------------------------------------------------------------------
+// Get both localStorage and cookies in one go
+const state = await page.evaluate(() => ({
+    localStorage: { ...localStorage },
+    sessionStorage: { ...sessionStorage }
+}));
+
+
+================================================================================
+                    QUICK REFERENCE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concept                    │ Key Point                                      │
+├────────────────────────────┼────────────────────────────────────────────────┤
+│ localStorage               │ Persistent, shared across tabs, 5-10 MB        │
+│ sessionStorage             │ Tab-specific, cleared on close, ~5 MB          │
+│ Cookies                    │ Sent with requests, ~4 KB, supports HttpOnly   │
+│ ...localStorage            │ Converts Storage object to plain object        │
+│ page.evaluate()            │ Runs code in browser context                   │
+│ storageState()             │ Captures cookies + localStorage               │
+└────────────────────────────┴────────────────────────────────────────────────┘
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
+
+
