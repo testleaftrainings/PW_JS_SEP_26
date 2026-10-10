@@ -1,0 +1,1503 @@
+📑 Agenda – Day 09 | TypeScript Fundamentals
+⏱ Total Duration: 4 Hours
+
+-----------------------------------------------------------------------------------
+url :  https://uibank.uipath.com/accounts/account-apply 
+---> 
+userId	:	64290731ba9f8a0047adacfc
+sessionToken : BOeETWh07HFl7AAvvlNBfQicAHJhKEKl8uEgKhksKvbg8YJAEzj19kM80MPDFBgq
+cookie : server  --->  auth.json
+-----------------------------------------------------------------------------------
+Interview Question :
+
+Your team is starting a new Playwright automation project. Some team members want 
+to use plain JavaScript because 'it's faster to write.' You advocate for TypeScript. 
+What specific benefits does TypeScript bring to an automation framework that 
+JavaScript lacks? Give concrete examples of how TypeScript prevents bugs in 
+Playwright tests.
+
+
+
+1) Better Playwright Integration
+2) Static Type Checking
+3) IntelliSense / Auto Suggestions
+4) Strongly Typed Page Object Model (POM)
+5) Safer Framework Utility Methods
+6) Interfaces Improve Framework Design
+
+
+================================================================================
+                          TYPESCRIPT INTRODUCTION
+================================================================================
+
+TYPESCRIPT INSTALLATION COMMANDS
+================================================================================
+
+GLOBAL INSTALLATION:
+--------------------------------------------------------------------------------
+1. npm install typescript -g
+2. Check: tsc --version
+
+
+LOCAL PROJECT LEVEL INSTALLATION:
+--------------------------------------------------------------------------------
+npm install --save-dev typescript
+
+
+RUNNING .TS FILE DIRECTLY
+================================================================================
+
+Follow below steps to directly run a .ts file without compiling to JavaScript:
+
+STEP 1: Install ts-node globally
+--------------------------------------------------------------------------------
+npm install -g ts-node
+
+STEP 2: Initialize TypeScript configuration
+--------------------------------------------------------------------------------
+npx tsc --init  → This will create a default tsconfig.json
+
+STEP 3: Modify tsconfig.json
+--------------------------------------------------------------------------------
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "ignoreDeprecations": "6.0",
+    "types": ["node"],
+    "resolveJsonModule": true
+  }
+}
+
+STEP 4: Execute the file directly
+--------------------------------------------------------------------------------
+ts-node filename.ts
+
+================================================================================
+                         COMPILATION PROCESS
+================================================================================
+
+TRADITIONAL WAY:
+--------------------------------------------------------------------------------
+Step 1: tsc filename.ts  → Produces filename.js
+Step 2: node filename.js
+
+EASY WAY:
+--------------------------------------------------------------------------------
+npx ts-node filename.ts
+
+WHY:
+  • No manual compilation
+  • No JS generation
+  • Direct execution
+
+
+================================================================================
+WHY TYPESCRIPT IN AUTOMATION?
+================================================================================
+
+PROBLEM IN JAVASCRIPT:
+--------------------------------------------------------------------------------
+• No type checking
+• Errors found only during execution
+• Large frameworks become difficult to maintain
+
+SOLUTION:
+--------------------------------------------------------------------------------
+TypeScript introduces static typing.
+Errors are identified during compilation itself.
+
+REAL-TIME BENEFIT:
+--------------------------------------------------------------------------------
+• Prevents incorrect test data
+• Prevents framework misuse
+• Improves IntelliSense
+• Reduces flaky failures
+
+================================================================================
+THE TYPE SYSTEM
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+A set of rules that a type checker uses to assign types to your program.
+
+TWO KINDS OF TYPE SYSTEMS:
+--------------------------------------------------------------------------------
+1. Explicit syntax type systems (you tell TypeScript the type)
+2. Inferred type systems (TypeScript figures out the type automatically)
+
+
+TYPE ANNOTATIONS:
+--------------------------------------------------------------------------------
+To explicitly signal to TypeScript what your types are, use annotations.
+
+Syntax: value: type
+
+EXAMPLES:
+--------------------------------------------------------------------------------
+let a: number = 1           // a is a number
+let b: string = 'hello'     // b is a string
+let c: boolean[] = [true, false]  // c is an array of booleans
+
+
+TYPE INFERENCE:
+--------------------------------------------------------------------------------
+If you want TypeScript to infer your types for you, just leave them off:
+
+let a = 1                   // a is a number (inferred)
+let b = 'hello'             // b is a string (inferred)
+let c = [true, false]       // c is an array of booleans (inferred)
+
+
+
+================================================================================
+                         TYPESCRIPT DATA TYPES
+================================================================================
+
+1. number
+--------------------------------------------------------------------------------
+WHAT: Used to store numeric values.
+
+REAL-TIME EXAMPLE - Test Execution Count:
+--------------------------------------------------------------------------------
+let totalTests: number = 250;
+let passedTests: number = 245;
+let failedTests: number = 5;
+
+WHY: Execution metrics are always numeric.
+
+
+2. string
+--------------------------------------------------------------------------------
+WHAT: Used to store textual values.
+
+REAL-TIME EXAMPLE - Login Credentials:
+--------------------------------------------------------------------------------
+let username: string = "admin@testleaf.com";
+let password: string = "Test@123";
+
+WHY: Usernames, passwords, URLs and locator names are strings.
+
+
+3. boolean
+--------------------------------------------------------------------------------
+WHAT: Stores true or false.
+
+REAL-TIME EXAMPLE - Element Visibility Validation:
+--------------------------------------------------------------------------------
+let isLoginButtonVisible: boolean = true;
+
+PLAYWRIGHT EXAMPLE:
+--------------------------------------------------------------------------------
+const isVisible: boolean = await page.locator("#login").isVisible();
+
+WHY: Most validations produce true or false results.
+
+
+4. undefined
+--------------------------------------------------------------------------------
+WHAT: Variable declared but value not assigned.
+
+REAL-TIME EXAMPLE - Optional Test Data:
+--------------------------------------------------------------------------------
+let otp: string | undefined;
+
+WHY: OTP may not be available immediately.
+
+
+5. null
+--------------------------------------------------------------------------------
+WHAT: Represents intentional absence of value.
+
+REAL-TIME EXAMPLE - User Profile Data:
+--------------------------------------------------------------------------------
+let profilePicture: string | null = null;
+
+WHY: User has not uploaded a profile picture.
+
+
+6. any
+--------------------------------------------------------------------------------
+WHAT: Accepts any datatype.
+
+WHY: Useful when data structure is completely unknown.
+
+REAL-TIME EXAMPLE - Dynamic API Response:
+--------------------------------------------------------------------------------
+let response: any = await apiResponse.json();
+
+RISK:
+console.log(response.userName.toUpperCase());
+
+If API returns: { "userName": 12345 }
+
+Runtime Failure: toUpperCase is not a function
+
+INTERVIEW POINT:
+any disables TypeScript safety. Use only when absolutely required.
+
+
+7. unknown
+--------------------------------------------------------------------------------
+WHAT: Accepts any datatype but validation is mandatory.
+
+WHY: Safer alternative to any.
+
+REAL-TIME EXAMPLE - Third-Party API Response:
+--------------------------------------------------------------------------------
+let response: unknown = await apiResponse.json();
+
+Before Usage:
+--------------------------------------------------------------------------------
+if (typeof response === "object" && response !== null) {
+    console.log(response);
+}
+
+================================================================================
+TYPESCRIPT DATA TYPES - any vs unknown
+================================================================================
+
+✅ any — "Turn Off TypeScript"
+--------------------------------------------------------------------------------
+let data: any = "Message received from the server";
+data = 1234;
+data = true;
+
+data.toUpperCase();  // ✅ No error at compile time
+data.push(10);       // ✅ No error
+data();              // ✅ No error
+
+🔴 PROBLEM:
+TypeScript does not check anything on 'any'.
+Even wrong operations compile successfully, and your app crashes at runtime.
+
+So "any" means: "I don't care about type safety."
+
+
+✅ unknown — "Safe Version of any"
+--------------------------------------------------------------------------------
+let value: unknown;
+
+value = 40;
+value = "Hello";
+
+value.toUpperCase(); // ❌ ERROR (compile time)
+
+TypeScript blocks you here because: "I don't know what type this is yet."
+
+FIX - Type Checking:
+--------------------------------------------------------------------------------
+if (typeof value === "string") {
+    console.log(value.toUpperCase()); // ✅ Allowed
+}
+
+✅ Now TypeScript knows it is a string.
+✅ You proved the type — so it allows safe operations.
+
+
+REAL TIME EXAMPLE FOR "unknown" DATATYPE:
+--------------------------------------------------------------------------------
+Reusable Utility Functions
+
+Suppose you're building a common logger:
+
+function logData(data: unknown) {
+    if (typeof data === "string") {
+        console.log(data.toUpperCase());
+    }
+}
+
+If you use 'any', someone can pass: logData(123); and it crashes.
+With unknown, framework forces validation.
+
+
+================================================================================
+COMPARISON: any vs unknown
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Feature                    │ any                    │ unknown                │
+├────────────────────────────┼────────────────────────┼────────────────────────┤
+│ Type Safety                │ ❌ None                │ ✅ Required            │
+│ Compile-time Checking      │ ❌ Disabled            │ ✅ Enabled             │
+│ Can call any method        │ ✅ Yes (dangerous)     │ ❌ No (needs check)    │
+│ Runtime crashes            │ ⚠️ Possible            │ ✅ Prevented           │
+│ Framework recommendation   │ ❌ Avoid               │ ✅ Use for unknown data│
+└────────────────────────────┴────────────────────────┴────────────────────────┘
+
+
+
+
+8. never
+--------------------------------------------------------------------------------
+WHAT: Represents a function that never returns.
+
+WHY: Execution stops completely.
+
+DEFINITION:
+--------------------------------------------------------------------------------
+In Playwright, 'never' is used for functions that permanently stop a test when
+a critical failure happens.
+
+EXAMPLE 1 - Simple Beginner Example:
+--------------------------------------------------------------------------------
+function throwError(message: string): never {
+    throw new Error(message);
+}
+
+function checkNumber(num: number) {
+    if (num > 0) {
+        console.log("Positive number");
+    } else {
+        throwError("Number must be positive");
+    }
+}
+
+checkNumber(5);   // Output: Positive number
+checkNumber(-1);  // Throws Error: Number must be positive
+
+
+EXAMPLE 2 - Real Time Playwright Example:
+--------------------------------------------------------------------------------
+import { test, expect } from "@playwright/test";
+
+// A function that always stops the test
+function stopTest(message: string): never {
+    throw new Error(message);  // ❌ Test execution stops here
+}
+
+test("Login test with never example", async ({ page }) => {
+
+    await page.goto("http://leaftaps.com/opentaps/control/main");
+
+    const title = await page.title();
+
+    if (title !== "Login") {  // when the title value is false
+        stopTest("Login page did not load correctly"); // ✅ never
+    }
+
+    // ✅ This line runs ONLY if the title is correct
+    console.log("Test continues safely...");
+});
+
+
+KEY CHARACTERISTICS OF never:
+--------------------------------------------------------------------------------
+• Function NEVER returns a value
+• Function throws an exception OR
+• Function has infinite loop
+• Used for error handling functions
+• Indicates unreachable code after call
+
+
+
+9. tuple
+--------------------------------------------------------------------------------
+WHAT: Fixed-size array with fixed datatype order.
+
+WHY: Some data always follows a specific order.
+
+REAL-TIME EXAMPLE 1 - Login Credentials:
+--------------------------------------------------------------------------------
+let loginData: [string, string] = [
+    "admin@testleaf.com",
+    "Test@123"
+];
+
+Meaning:
+  Index 0 → Username
+  Index 1 → Password
+
+REAL-TIME EXAMPLE 2 - API Validation Result:
+--------------------------------------------------------------------------------
+let apiResult: [number, string, boolean] = [
+    200,
+    "Success",
+    true
+];
+
+Meaning:
+  Index 0 → Status Code
+  Index 1 → Message
+  Index 2 → Validation Result
+
+REAL-TIME EXAMPLE 3 - Execution Summary:
+--------------------------------------------------------------------------------
+let executionSummary: [string, number, number] = [
+    "Regression",
+    250,
+    245
+];
+
+Meaning:
+  Index 0 → Suite Name
+  Index 1 → Total Tests
+  Index 2 → Passed Tests
+
+
+
+
+================================================================================
+                         TODAY'S INTERVIEW SUMMARY
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Type        │ Usage                                                         │
+├─────────────┼───────────────────────────────────────────────────────────────┤
+│ number      │ Execution counts, status codes                                │
+│ string      │ Credentials, URLs, locators                                   │
+│ boolean     │ Validation results                                            │
+│ undefined   │ Value not assigned yet                                        │
+│ null        │ Intentionally empty value                                     │
+│ any         │ Completely unknown data (unsafe)                              │
+│ unknown     │ Unknown data requiring validation (safe)                      │
+│ never       │ Framework fail-fast methods                                   │
+│ tuple       │ Fixed-order data like credentials and API results             │
+└─────────────┴───────────────────────────────────────────────────────────────┘
+
+GOLDEN RULES:
+--------------------------------------------------------------------------------
+• Use unknown instead of any whenever possible
+• Use never for framework exceptions
+• Use tuple when order and datatype are fixed
+
+SUMMARY:
+  any     → Avoid when possible
+  unknown → Preferred for external data
+  never   → Used for fatal framework failures
+  tuple   → Used for fixed structured test data
+
+
+================================================================================
+                            DATA STRUCTURES  
+          (TypeScript + Real-Time Automation Framework Perspective)
+================================================================================
+
+1. WHAT IS A DATA STRUCTURE?
+================================================================================
+
+A Data Structure is a way of organizing and storing data so that it can be
+accessed, managed, and modified efficiently.
+
+REAL-TIME EXAMPLE:
+--------------------------------------------------------------------------------
+Instead of:
+let username = "admin";
+let password = "admin123";
+let url = "https://qa-app.com";
+
+Store related data together:
+const config = {
+    username: "admin",
+    password: "admin123",
+    url: "https://qa-app.com"
+}
+
+This improves maintainability and readability.
+
+
+2. WHY DO WE NEED DATA STRUCTURES?
+================================================================================
+
+WITHOUT DATA STRUCTURES:
+--------------------------------------------------------------------------------
+let empId1 = 101;
+let empId2 = 102;
+let empId3 = 103;
+
+Difficult to manage when data grows.
+
+WITH DATA STRUCTURES:
+--------------------------------------------------------------------------------
+const empIds = [101, 102, 103];
+
+Easy to: Add, Remove, Search, Sort, Iterate
+
+
+3. ARRAY
+================================================================================
+
+Stores multiple values in a single variable.
+
+const browsers = ["chrome", "edge", "firefox", "safari"];
+
+REAL-TIME AUTOMATION EXAMPLE - Store supported browsers:
+--------------------------------------------------------------------------------
+const browsers = ["chrome", "edge", "firefox", "safari"];
+
+Access: browsers[0]  // chrome
+
+FRAMEWORK USAGE:
+  • Test Data
+  • URLs
+  • Browser Names
+  • User Roles
+  • Expected Values
+
+
+4. OBJECT
+================================================================================
+
+Stores data as key-value pairs.
+
+const employee = {
+    empId: 882,
+    designation: "Sr.SDET"
+}
+
+REAL-TIME AUTOMATION EXAMPLE - Environment Configuration:
+--------------------------------------------------------------------------------
+const config = {
+    username: "DemoCSR",
+    password: "crmsfa",
+    url: "https://leaftaps.com"
+}
+
+FRAMEWORK USAGE:
+  • Config Files
+  • Test Data
+  • API Payloads
+  • Environment Settings
+
+
+5. NESTED OBJECT
+================================================================================
+
+Object inside another object.
+
+const empInfo = {
+    bhuvaneshInfo: {
+        empId: 882,
+        designation: "Sr.SDET"
+    },
+    vinothInfo: {
+        empId: 445,
+        designation: "SDET"
+    }
+}
+
+STRUCTURE:
+--------------------------------------------------------------------------------
+empInfo
+│
+├── bhuvaneshInfo
+│   ├── empId
+│   └── designation
+│
+└── vinothInfo
+    ├── empId
+    └── designation
+
+REAL-TIME AUTOMATION EXAMPLE - Multiple Environment Configurations:
+--------------------------------------------------------------------------------
+const environments = {
+    qa: {
+        url: "https://qa-app.com"
+    },
+    prod: {
+        url: "https://prod-app.com"
+    }
+}
+
+Access: environments.qa.url
+
+
+6. TYPE ALIAS
+================================================================================
+
+Used to create reusable custom types.
+
+WITHOUT TYPE ALIAS:
+--------------------------------------------------------------------------------
+bhuvaneshInfo: { empId: number, phno: number }
+vinothInfo: { empId: number, phno: number }
+
+Repeated structure.
+
+WITH TYPE ALIAS:
+--------------------------------------------------------------------------------
+type Employee = {
+    empId: number,
+    phno: number
+}
+
+Reuse:
+bhuvaneshInfo: Employee
+vinothInfo: Employee
+
+BENEFITS:
+  • Reusability
+  • Readability
+  • Maintainability
+  • Less duplication
+
+
+7. UNION TYPE ( | )
+================================================================================
+
+Represents "OR".
+
+type Browser = "chrome" | "edge" | "firefox" | "safari";
+
+Meaning: browser can be chrome OR edge OR firefox OR safari
+
+REAL-TIME AUTOMATION EXAMPLE:
+--------------------------------------------------------------------------------
+type Environment = "QA" | "UAT" | "PROD";
+
+Restricts invalid values.
+
+let env: Environment = "QA";     // Valid
+let env: Environment = "DEV";    // Invalid
+
+8. INTERSECTION TYPE ( & )
+================================================================================
+
+Represents "AND". Combines multiple types.
+
+When does Intersection Work?
+
+Intersection is mostly useful with Objects.
+
+type Credentials = {
+    username: string,
+    password: string
+}
+
+type EnvironmentUrl = {
+    url: string
+}
+
+Combine:
+type TestConfig = Credentials & EnvironmentUrl;
+
+Result:
+{
+    username: string,
+    password: string,
+    url: string
+}
+
+Here intersection makes sense because:
+Object can contain properties from both types.
+
+REAL-TIME AUTOMATION EXAMPLE - Framework Configuration:
+--------------------------------------------------------------------------------
+type TestConfig = Credentials & EnvironmentUrl;
+
+const preCondition : TestConfig = {
+    username: "DemoCSR",
+    password: "crmsfa",
+    url: "https://leaftaps.com"
+}
+
+
+10. TYPE NARROWING (Most Important Concept)
+================================================================================
+
+INITIAL STATE:
+--------------------------------------------------------------------------------
+type Browser = "chrome" | "edge" | "firefox" | "safari";
+let browserName: Browser;
+
+Possible values: chrome, edge, firefox, safari
+
+AFTER ASSIGNMENT:
+--------------------------------------------------------------------------------
+browserName = "chrome";
+
+TypeScript narrows: chrome | edge | firefox | safari → to → chrome
+
+This is called: Type Narrowing (Control Flow Analysis)
+
+WHY IT MATTERS:
+TypeScript can predict unreachable code and catch mistakes during compilation.
+
+
+
+REAL-TIME PLAYWRIGHT EXAMPLE:
+--------------------------------------------------------------------------------
+type Environment = "QA" | "UAT" | "PROD";
+
+function execute(env: Environment){
+
+    switch(env){
+
+        case "QA":
+            console.log("Run QA URL");
+            break;
+
+        case "UAT":
+            console.log("Run UAT URL");
+            break;
+
+        case "PROD":
+            console.log("Run PROD URL");
+            break;
+    }
+}
+
+
+================================================================================
+                         INTERVIEW SUMMARY - DATA STRUCTURES
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concept         │ Description                        │ Framework Use        │
+├─────────────────┼────────────────────────────────────┼──────────────────────┤
+│ Array           │ Stores multiple values (index 0)   │ Test data, browser   │
+│                 │                                    │ lists                │
+│ Object          │ Key-value pairs                    │ Configs, payloads    │
+│ Nested Object   │ Object inside another object       │ Multi-environment    │
+│                 │                                    │ configs              │
+│ Type Alias      │ Reusable custom type               │ Avoid code duplication│
+│ Union ( | )     │ Choose One                         │ Browser selection    │
+│ Intersection (&)│ Merge All                          │ Framework config     │
+│ Type Narrowing  │ TypeScript reduces possible values │ Compile-time         │
+│                 │ when exact value is known          │ validation           │
+│ Switch          │ Browser-specific logic execution   │ Browser launch logic │
+└─────────────────┴────────────────────────────────────┴──────────────────────┘
+
+
+REAL FRAMEWORK MAPPING:
+================================================================================
+Array           → Browser List, Test Data
+Object          → Config Files
+Nested Object   → Multi-Environment Data
+Union Type      → Browser Selection
+Intersection    → Framework Configuration
+Switch          → Browser Launch Logic
+Type Narrowing  → Compile-Time Validation
+
+
+================================================================================
+                    TYPE ASSERTION IN TYPESCRIPT
+================================================================================
+
+WHAT IS TYPE ASSERTION?
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Type Assertion tells TypeScript:
+
+  "Trust me, I know the datatype better than you."
+
+IMPORTANT:
+  • It does NOT change the actual datatype
+  • It only tells the TypeScript compiler to treat a value as a specific type
+
+
+WHY DO WE NEED TYPE ASSERTION?
+================================================================================
+
+Sometimes TypeScript cannot determine the exact type.
+
+EXAMPLE:
+--------------------------------------------------------------------------------
+let value: unknown = "Playwright";
+
+Here TypeScript only knows: value is unknown
+
+So this will FAIL:
+console.log(value.toUpperCase());
+// Compile Error: Object is of type 'unknown'
+
+
+HOW TO PERFORM TYPE ASSERTION?
+================================================================================
+
+METHOD 1: Using "as"
+--------------------------------------------------------------------------------
+let value: unknown = "Playwright";
+console.log((value as string).toUpperCase());
+// Output: PLAYWRIGHT
+
+METHOD 2: Angle Bracket Syntax
+--------------------------------------------------------------------------------
+let value: unknown = "Playwright";
+console.log((<string>value).toUpperCase());
+// Output: PLAYWRIGHT
+
+NOTE:
+  • Prefer "as" syntax
+  • Angle bracket syntax is avoided in React projects
+
+
+REAL-TIME PLAYWRIGHT EXAMPLES
+================================================================================
+
+EXAMPLE 1: API Response
+--------------------------------------------------------------------------------
+Without Type Assertion:
+let response: unknown = await apiResponse.json();
+console.log(response.userName);
+// Compile Error: Object is of type 'unknown'
+
+With Type Assertion:
+let response: unknown = await apiResponse.json();
+console.log((response as any).userName);
+
+EXAMPLE 2: Environment Configuration
+--------------------------------------------------------------------------------
+let envData: unknown = {
+    url: "https://testleaf.com"
+};
+console.log((envData as { url: string }).url);
+// Output: https://testleaf.com
+
+EXAMPLE 3: HTML Element Handling
+--------------------------------------------------------------------------------
+const element = document.getElementById("username");
+// TypeScript sees: HTMLElement | null
+
+To access input-specific properties:
+const input = document.getElementById("username") as HTMLInputElement;
+console.log(input.value);
+
+
+TYPE ASSERTION vs TYPE NARROWING
+================================================================================
+
+TYPE ASSERTION:
+--------------------------------------------------------------------------------
+let data: unknown = "Playwright";
+console.log((data as string).toUpperCase());
+
+Meaning: Developer is forcing TypeScript to trust him.
+
+TYPE NARROWING (Recommended):
+--------------------------------------------------------------------------------
+let data: unknown = "Playwright";
+
+if (typeof data === "string") {
+    console.log(data.toUpperCase());
+}
+
+Meaning: TypeScript validates before usage.
+
+
+RISK OF TYPE ASSERTION
+================================================================================
+
+EXAMPLE:
+--------------------------------------------------------------------------------
+let value: unknown = 100;
+console.log((value as string).toUpperCase());
+
+TypeScript: No Compile Error
+Runtime: TypeError: toUpperCase is not a function
+
+REASON:
+  Type Assertion does NOT convert data.
+  It only changes compiler perception.
+
+
+INTERVIEW EXAMPLE
+================================================================================
+
+function getResponse(): unknown {
+    return {
+        userName: "Admin"
+    };
+}
+
+const response = getResponse() as { userName: string };
+console.log(response.userName);
+// Output: Admin
+
+
+================================================================================
+                         INTERVIEW SUMMARY
+================================================================================
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ Concept                      │ Description                                   │
+├──────────────────────────────┼───────────────────────────────────────────────┤
+│ Type Assertion               │ Explicitly tell TypeScript the expected       │
+│                              │ datatype                                      │
+│ Syntax 1                     │ value as datatype                             │
+│ Syntax 2                     │ <datatype>value                               │
+│ Does NOT perform             │ Datatype conversion                           │
+│ Only affects                 │ TypeScript compilation                        │
+│ Recommended alternative      │ Type Narrowing (runtime safety)               │
+└──────────────────────────────┴───────────────────────────────────────────────┘
+
+GOLDEN RULE:
+--------------------------------------------------------------------------------
+Whenever possible, prefer Type Narrowing over Type Assertion because it provides
+runtime safety.
+
+
+================================================================================
+                    CLASSROOM ACTIVITY: UNION TYPE
+================================================================================
+
+ACTIVITY DESCRIPTION:
+--------------------------------------------------------------------------------
+- Create a function that accepts only specific payment methods.
+- Create a type alias called PaymentMethod that allows only "UPI", "CreditCard",
+  or "PayPal".
+- Write a function makePayment that takes a parameter of type PaymentMethod and
+  prints which payment method is chosen.
+- Call the function with "UPI" and "CreditCard" as arguments.
+
+
+OUTPUT:
+--------------------------------------------------------------------------------
+Payment method chosen: UPI
+Payment method chosen: CreditCard
+================================================================================
+
+================================================================================
+                         ENUMS IN TYPESCRIPT
+                    (AUTOMATION FRAMEWORK CONTEXT)
+================================================================================
+
+INTRODUCTION
+================================================================================
+
+Enums are used when we have a fixed set of constants. In automation frameworks,
+common examples include Execution Status, Browser Types, User Roles, and
+Environment Names.
+
+WHAT IS ENUM?
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Enum (Enumeration) is a TypeScript feature used to define a fixed set of named
+constants.
+
+INSTEAD OF:
+--------------------------------------------------------------------------------
+let browser = "chrome";
+let status = "PASS";
+let role = "ADMIN";
+
+WE CAN USE:
+--------------------------------------------------------------------------------
+enum Browser {
+    CHROME,
+    FIREFOX,
+    EDGE
+}
+
+WHY USE ENUMS?
+================================================================================
+
+• Avoid hardcoded values
+• Avoid spelling mistakes (compile-time validation)
+• Improve code readability
+• Provide IDE auto-suggestions
+• Maintain centralized constants
+• Enable safe refactoring
+
+
+REAL-TIME AUTOMATION EXAMPLES
+================================================================================
+
+1. BROWSER TYPES:
+--------------------------------------------------------------------------------
+enum Browser {
+    CHROME = "chrome",
+    FIREFOX = "firefox",
+    EDGE = "msedge"
+}
+
+let browser = Browser.CHROME;
+
+Use Cases:
+  • Cross-browser execution
+  • Framework configuration
+  • Browser selection logic
+
+2. EXECUTION STATUS:
+--------------------------------------------------------------------------------
+enum ExecutionStatus {
+    PASS = "PASS",
+    FAIL = "FAIL",
+    SKIP = "SKIP"
+}
+
+Use Cases:
+  • Custom reporting
+  • Extent/Allure Reports
+  • Test result processing
+
+3. ENVIRONMENT SELECTION:
+--------------------------------------------------------------------------------
+enum Environment {
+    QA = "https://qa.testleaf.com",
+    UAT = "https://uat.testleaf.com",
+    PROD = "https://prod.testleaf.com"
+}
+
+Use Cases:
+  • Environment management
+  • URL selection
+  • Configuration management
+
+4. USER ROLES:
+--------------------------------------------------------------------------------
+enum UserRole {
+    ADMIN = "ADMIN",
+    MANAGER = "MANAGER",
+    USER = "USER",
+    GUEST = "GUEST"
+}
+
+
+TYPES OF ENUM
+================================================================================
+
+1. NUMERIC ENUM
+--------------------------------------------------------------------------------
+
+WHAT:
+If values are not initialized, TypeScript automatically assigns numbers starting
+from 0.
+
+SYNTAX:
+enum ExecutionStatus {
+    PASS,    // 0
+    FAIL,    // 1
+    SKIP     // 2
+}
+
+INTERNAL REPRESENTATION:
+enum ExecutionStatus {
+    PASS = 0,
+    FAIL = 1,
+    SKIP = 2
+}
+
+USAGE:
+console.log(ExecutionStatus.PASS);  // Output: 0
+
+WHEN TO USE:
+  • When numeric values are sufficient
+  • Less commonly used in automation projects
+
+2. STRING ENUM (RECOMMENDED FOR AUTOMATION)
+--------------------------------------------------------------------------------
+
+WHAT:
+Values are explicitly assigned as strings.
+
+SYNTAX:
+enum ExecutionStatus {
+    PASS = "PASS",
+    FAIL = "FAIL",
+    SKIP = "SKIP"
+}
+
+USAGE:
+console.log(ExecutionStatus.PASS);  // Output: PASS
+
+WHY PREFER STRING ENUMS:
+  • Readable logs
+  • Readable reports
+  • Easy debugging
+  • Better maintainability
+  • Self-documenting code
+
+REAL PROJECT RECOMMENDATION:
+  Always prefer String Enum in automation frameworks.
+
+
+ENUM vs TYPE ALIAS
+================================================================================
+
+TYPE ALIAS:
+--------------------------------------------------------------------------------
+type Browser = "chrome" | "firefox" | "msedge";
+
+let browser: Browser = "chrome";
+
+PURPOSE: Creates a custom datatype for compile-time validation
+
+ENUM:
+--------------------------------------------------------------------------------
+enum Browser {
+    CHROME = "chrome",
+    FIREFOX = "firefox",
+    EDGE = "msedge"
+}
+
+let browser = Browser.CHROME;
+
+PURPOSE: Creates named constants usable at compile time AND runtime
+
+COMPARISON TABLE:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Feature                    │ Enum               │ Type Alias                │
+├────────────────────────────┼────────────────────┼───────────────────────────┤
+│ Creates Constants          │ Yes                │ No                        │
+│ Exists at Runtime          │ Yes                │ No                        │
+│ Generates JavaScript Code  │ Yes                │ No                        │
+│ Auto Suggestion            │ Excellent          │ Good                      │
+│ Used for Fixed Values      │ Yes                │ Yes                       │
+│ Can have methods           │ No		  │ No                        │
+└────────────────────────────┴────────────────────┴───────────────────────────┘
+
+
+ENUM vs TYPE ASSERTION
+================================================================================
+
+These are completely different concepts.
+
+ENUM:
+--------------------------------------------------------------------------------
+PURPOSE: Store predefined constant values.
+
+EXAMPLE:
+enum UserRole {
+    ADMIN = "ADMIN",
+    USER = "USER"
+}
+
+let role = UserRole.ADMIN;
+
+TYPE ASSERTION:
+--------------------------------------------------------------------------------
+PURPOSE: Tell TypeScript to trust the developer about a datatype.
+
+EXAMPLE:
+let value: unknown = "Playwright";
+let data = value as string;
+
+Meaning: "I know this value is string. Trust me."
+
+COMPARISON TABLE:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Feature                    │ Enum               │ Type Assertion            │
+├────────────────────────────┼────────────────────┼───────────────────────────┤
+│ Stores Constants           │ Yes                │ No                        │
+│ Creates Types              │ No                 │ No                        │
+│ Helps Runtime Logic        │ Yes                │ No                        │
+│ Changes Compiler Perception│ No                 │ Yes                       │
+│ Used for Data Conversion   │ No                 │ No                        │
+└────────────────────────────┴────────────────────┴───────────────────────────┘
+
+
+WHEN TO USE ENUM?
+================================================================================
+
+USE ENUM FOR:
+--------------------------------------------------------------------------------
+✓ Browser Types (CHROME, FIREFOX, EDGE, SAFARI)
+✓ Execution Status (PASS, FAIL, SKIP)
+✓ Environment Names (QA, UAT, PROD, DEV)
+✓ User Roles (ADMIN, MANAGER, USER, GUEST)
+✓ Payment Status (PENDING, COMPLETED, FAILED, REFUNDED)
+✓ Order Status (CREATED, PROCESSING, SHIPPED, DELIVERED)
+✓ HTTP Status Codes (OK, CREATED, BAD_REQUEST, UNAUTHORIZED)
+
+WHEN NOT TO USE ENUM:
+--------------------------------------------------------------------------------
+✗ For simple datatype restrictions (use Type Alias instead)
+
+EXAMPLE - Prefer Type Alias:
+type Browser = "chrome" | "firefox" | "msedge";
+
+
+INTERVIEW SUMMARY
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concept                      │ Key Point                                     │
+├──────────────────────────────┼───────────────────────────────────────────────┤
+│ Enum Definition              │ Fixed set of named constants                 │
+│ Numeric Enum                 │ Auto-assigns values (0, 1, 2...)             │
+│ String Enum                  │ Explicit string values (recommended)         │
+│ Primary Benefit              │ No hardcoded values, no spelling mistakes    │
+│ Enum vs Type Alias           │ Enum = runtime constants; Type Alias = types │
+│ Enum vs Type Assertion       │ Completely different concepts                │
+│ Automation Recommendation    │ Always prefer String Enum                    │
+└──────────────────────────────┴───────────────────────────────────────────────┘
+
+
+GOLDEN RULES
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Type Alias          → Creates Custom Types (compile-time only)             │
+│ Enum                → Creates Fixed Constants (runtime + compile-time)     │
+│ Type Assertion      → Forces TypeScript to Trust the Developer             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+REAL PROJECT EXAMPLE:
+================================================================================
+
+// enums/Browser.enum.ts
+export enum Browser {
+    CHROME = "chrome",
+    FIREFOX = "firefox",
+    EDGE = "msedge",
+    SAFARI = "webkit"
+}
+
+// enums/Environment.enum.ts
+export enum Environment {
+    QA = "https://qa.testleaf.com",
+    UAT = "https://uat.testleaf.com",
+    PROD = "https://prod.testleaf.com"
+}
+
+// config/playwright.config.ts
+import { Browser, Environment } from './enums';
+
+const browser = Browser.CHROME;
+const baseURL = Environment.QA;
+
+export default defineConfig({
+    use: {
+        browserName: browser,
+        baseURL: baseURL
+    }
+});
+
+
+================================================================================
+                         INTERVIEW SUMMARY - DATA STRUCTURES
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concept         │ Description                        │ Framework Use        │
+├─────────────────┼────────────────────────────────────┼──────────────────────┤
+│ Array           │ Stores multiple values (index 0)   │ Test data, browser   │
+│                 │                                    │ lists                │
+│ Object          │ Key-value pairs                    │ Configs, payloads    │
+│ Nested Object   │ Object inside another object       │ Multi-environment    │
+│                 │                                    │ configs              │
+│ Type Alias      │ Reusable custom type               │ Avoid code duplication│
+│ Union ( | )     │ Choose One                         │ Browser selection    │
+│ Switch          │ Browser-specific logic execution   │ Browser launch logic │
+└─────────────────┴────────────────────────────────────┴──────────────────────┘
+
+
+================================================================================
+                    METHOD 3: ENVIRONMENT PARAMETERIZATION
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Environment parameterization allows the same test suite to run against different
+environments (Dev, QA, UAT, Prod) without changing test code.
+
+WHY ENVIRONMENT PARAMETERIZATION?
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Problem                           │ Solution                                 │
+├───────────────────────────────────┼──────────────────────────────────────────┤
+│ Hardcoded URLs in tests           │ Dynamic baseURL from environment       │
+│ Different credentials per env     │ Environment-specific config            │
+│ Test fails on different env       │ Single test suite for all env          │
+│ Manual config changes per env     │ Automated environment selection        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+COMMON ENVIRONMENTS:
+--------------------------------------------------------------------------------
+  • DEV  → Development environment (developers)
+  • QA   → Quality Assurance (testing team)
+  • UAT  → User Acceptance Testing (stakeholders)
+  • STG  → Staging (pre-production)
+  • PROD → Production (live)
+
+SETUP: playwright.config.ts
+--------------------------------------------------------------------------------
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  use: {
+    baseURL: process.env.BASE_URL || 'https://qa.example.com',
+  },
+});
+
+ENVIRONMENT CONFIGURATION FILES (config/env.config.ts):
+--------------------------------------------------------------------------------
+export const config = {
+  dev: {
+    baseURL: 'https://dev.example.com',
+    username: 'dev_user',
+    password: 'dev_pass',
+    apiBase: 'https://api-dev.example.com'
+  },
+  qa: {
+    baseURL: 'https://qa.example.com',
+    username: 'qa_user',
+    password: 'qa_pass',
+    apiBase: 'https://api-qa.example.com'
+  },
+  uat: {
+    baseURL: 'https://uat.example.com',
+    username: 'uat_user',
+    password: 'uat_pass',
+    apiBase: 'https://api-uat.example.com'
+  },
+  prod: {
+    baseURL: 'https://example.com',
+    username: 'prod_user',
+    password: 'prod_pass',
+    apiBase: 'https://api.example.com'
+  }
+};
+
+ENVIRONMENT-SPECIFIC CONFIG (config/env.ts):
+--------------------------------------------------------------------------------
+// config/env.ts
+const env = process.env.ENV || 'qa';
+
+const configs = {
+  dev: {
+    baseURL: 'https://dev.example.com',
+    credentials: {
+      username: 'dev_user',
+      password: 'dev_pass'
+    }
+  },
+  qa: {
+    baseURL: 'https://qa.example.com',
+    credentials: {
+      username: 'qa_user',
+      password: 'qa_pass'
+    }
+  },
+  uat: {
+    baseURL: 'https://uat.example.com',
+    credentials: {
+      username: 'uat_user',
+      password: 'uat_pass'
+    }
+  },
+  prod: {
+    baseURL: 'https://example.com',
+    credentials: {
+      username: 'prod_user',
+      password: 'prod_pass'
+    }
+  }
+};
+
+export default configs[env as keyof typeof configs];
+
+USING ENVIRONMENT CONFIG IN TESTS:
+--------------------------------------------------------------------------------
+import config from '../config/env';
+
+test('Login with environment config', async ({ page }) => {
+  await page.goto(config.baseURL);
+  await page.fill('#username', config.credentials.username);
+  await page.fill('#password', config.credentials.password);
+  await page.click('#login');
+});
+
+RUNNING TESTS WITH ENVIRONMENT VARIABLES:
+--------------------------------------------------------------------------------
+# Run in QA environment (default)
+npx playwright test
+
+# Run in Dev environment
+ENV=dev npx playwright test
+
+# Run in UAT environment
+ENV=uat npx playwright test
+
+# Run in Production environment
+ENV=prod npx playwright test
+
+# Windows PowerShell
+$env:ENV="prod"; npx playwright test
+
+ENVIRONMENT VARIABLES WITH .env FILE:
+--------------------------------------------------------------------------------
+# .env file (add to .gitignore)
+ENV=qa
+BASE_URL=https://qa.example.com
+API_KEY=abc123
+DB_PASSWORD=secure_password
+
+# Using dotenv package
+npm install dotenv
+
+# In config
+import dotenv from 'dotenv';
+dotenv.config();
+
+const env = process.env.ENV || 'qa';
+const baseURL = process.env.BASE_URL || 'https://qa.example.com';
+
+ENVIRONMENT-SPECIFIC TEST EXECUTION:
+--------------------------------------------------------------------------------
+import { test } from '@playwright/test';
+
+test.skip(process.env.ENV === 'prod', 'Skip destructive tests on production');
+
+test('Create user', async ({ page }) => {
+  // This test will skip on production
+});
+
+
+================================================================================
+                    COMPLETE PARAMETERIZATION COMPARISON
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Method      │ Best For                        │ Setup Required               │
+├─────────────┼─────────────────────────────────┼──────────────────────────────┤
+│ JSON        │ API responses, configs,         │ Just create .json file      │
+│             │ structured test data            │                              │
+├─────────────┼─────────────────────────────────┼──────────────────────────────┤
+│ CSV         │ Business data, Excel exports,   │ npm install csv-parse       │
+│             │ large datasets, non-technical   │ fs + parse imports          │
+│             │ data maintainers                │                              │
+├─────────────┼─────────────────────────────────┼──────────────────────────────┤
+│ Environment │ Cross-environment testing,      │ Configure playwright.config │
+│             │ CI/CD pipelines, secure configs │ .env file optional           │
+└─────────────┴─────────────────────────────────┴─────────────────────────────────┘
+
+
+================================================================================
+                    INDUSTRY REALITY CHECK
+================================================================================
+
+  📌 JSON  → Lightweight, API testing, microservices
+  📌 CSV   → Business data, Excel exports, non-technical team members
+  📌 ENV   → CI/CD pipelines, multi-environment testing, security
+
+
+================================================================================
+                    QUICK REVISION
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concept                    │ Key Point                                      │
+├────────────────────────────┼────────────────────────────────────────────────┤
+│ JSON                       │ Native to Node.js → No extra package          │
+│ CSV                        │ Needs fs + csv-parse → Extra package         │
+│ Environment                │ Uses process.env → CI/CD ready                │
+│ Parameterization Benefit   │ Same logic, different data                    │
+│ Data-Driven Testing        │ Run one test with multiple datasets           │
+└────────────────────────────────────────────────────────────────────────────┘
+
+GOLDEN RULES:
+================================================================================
+
+  1. JSON → Language understands it natively
+  2. CSV → Needs fs (to read) + parser (to convert text → objects)
+  3. Environment → Never hardcode URLs or credentials
+  4. Always store secrets in .env files (add to .gitignore)
+
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
+
