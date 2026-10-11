@@ -1,0 +1,568 @@
+📑 Agenda – Day 10 | TYPESCRIPT OOP 
+================================================================================
+                    TYPESCRIPT OOP LEARNING NOTES - COMPLETE REFERENCE
+================================================================================
+
+LEARNING JOURNEY COVERED
+================================================================================
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ 1. Class                                                                   │
+│ 2. Object                                                                  │
+│ 3. Constructor                                                             │
+│ 4. Static Members                                                          │
+│ 5. Access Modifiers                                                        │
+│ 6. Inheritance                                                             │
+│ 7. Polymorphism                                                            │
+│ 8. Method Overriding                                                       │                                           │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+1. CLASS
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+A class is a blueprint used to create objects.
+
+SYNTAX:
+class Employee {
+    work() {
+        console.log("Working");
+    }
+}
+
+At this stage:
+  • No memory allocated
+  • No object created
+  • Only blueprint exists
+
+REAL-TIME PLAYWRIGHT EXAMPLE:
+class LoginPage {
+    async login() {
+        console.log("Login Successful");
+    }
+}
+
+Common Page Classes:
+  • LoginPage
+  • HomePage
+  • LeadPage
+
+
+================================================================================
+2. OBJECT
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+An object is an instance of a class.
+
+SYNTAX:
+const emp = new Employee();
+
+Here:
+  Employee = Blueprint
+  emp = Real Object
+
+Memory is allocated only after new Employee() is executed.
+
+WHY DO WE NEED OBJECTS?
+--------------------------------------------------------------------------------
+class Employee {
+    work() {}
+}
+
+// Wrong:
+Employee.work();  // ❌ Error
+
+// Correct:
+const emp = new Employee();
+emp.work();  // ✅ Allowed
+
+Reason: Non-static methods belong to objects.
+
+
+================================================================================
+3. CONSTRUCTOR
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+A special method automatically executed during object creation.
+
+SYNTAX:
+class Employee {
+    constructor() {
+        console.log("Object Created");
+    }
+}
+
+new Employee();  // Output: Object Created
+
+WHY CONSTRUCTOR?
+--------------------------------------------------------------------------------
+Used for initialization.
+
+class Employee {
+    constructor(public name: string) {}
+}
+
+const emp = new Employee("Bhuvanesh");
+
+PLAYWRIGHT EXAMPLE:
+class LoginPage {
+    constructor(private page: Page) {}
+}
+
+Reason: Page object should be available throughout the class.
+
+
+================================================================================
+4. STATIC MEMBERS
+================================================================================
+
+STATIC VARIABLE:
+--------------------------------------------------------------------------------
+Belongs to class, not instances.
+
+class Employee {
+    static company = "TestLeaf";
+}
+
+Access: Employee.company  (No object needed)
+
+STATIC METHOD:
+--------------------------------------------------------------------------------
+class Employee {
+    static payroll() {
+        console.log("Payroll");
+    }
+}
+
+Usage: Employee.payroll();
+
+STATIC BLOCK:
+--------------------------------------------------------------------------------
+Executes once during class loading (similar to Java).
+
+class Employee {
+    static company: string;
+
+    static {
+        Employee.company = "TestLeaf";
+    }
+}
+
+NON-STATIC BLOCK:
+--------------------------------------------------------------------------------
+Java supports: { }
+TypeScript: NOT Supported
+Alternative: Constructor or Instance Field Initializer
+
+
+================================================================================
+5. ACCESS MODIFIERS
+================================================================================
+
+IMPORTANT RULE (Most Critical Learning):
+--------------------------------------------------------------------------------
+Access Modifiers are NOT Object Based.
+They are SCOPE Based.
+
+Compiler asks: "Who is calling?"
+NOT: "Which object is calling?"
+
+PUBLIC:
+--------------------------------------------------------------------------------
+Accessible everywhere.
+
+class Employee {
+    public work() {
+        console.log("Working");
+    }
+}
+
+new Employee().work();  // ✅ Allowed
+
+PRIVATE:
+--------------------------------------------------------------------------------
+Accessible only inside same class.
+
+class Employee {
+    private salary() {}
+}
+
+// Allowed inside class
+// Not allowed: obj.salary()
+
+WHY?
+Compiler checks CALLER LOCATION, not Object Ownership.
+
+PROTECTED:
+--------------------------------------------------------------------------------
+Accessible: Same Class + Child Class
+
+class BasePage {
+    protected waitForElement() {}
+}
+
+class LoginPage extends BasePage {
+    login() {
+        this.waitForElement();  // ✅ Allowed
+    }
+}
+
+// Outside:
+obj.waitForElement();  // ❌ Not allowed
+
+GOLDEN RULE:
+--------------------------------------------------------------------------------
+Do NOT ask: "Which object is calling?"
+ASK: "From where is the call made?"
+
+
+================================================================================
+6. FUNCTION vs METHOD
+================================================================================
+
+FUNCTION:
+--------------------------------------------------------------------------------
+Independent.
+
+function login() {}
+
+METHOD:
+--------------------------------------------------------------------------------
+Inside class.
+
+class LoginPage {
+    login() {}
+}
+
+RULE:
+  Every Method is a Function
+  But Every Function is not a Method
+
+ASYNC METHODS:
+--------------------------------------------------------------------------------
+Allowed and common in Playwright.
+
+class LoginPage {
+    async login() {
+        await page.click();
+    }
+}
+
+
+================================================================================
+7. INHERITANCE
+================================================================================
+
+KEYWORD: extends
+
+PARENT:
+class BasePage {
+    screenshot() {}
+}
+
+CHILD:
+class LoginPage extends BasePage {}
+
+USAGE:
+const page = new LoginPage();
+page.screenshot();  // ✅ Inherited
+
+WHY INHERITANCE?
+--------------------------------------------------------------------------------
+Without: Duplicate Code
+With: Code Reuse
+
+PLAYWRIGHT FRAMEWORK STRUCTURE:
+BasePage
+   ↑
+LoginPage
+   ↑
+HomePage
+
+Common methods (click, fill, screenshot) stored in BasePage.
+
+CONSTRUCTOR INHERITANCE:
+--------------------------------------------------------------------------------
+class Employee {
+    constructor(public name: string) {}
+}
+
+class Tester extends Employee {
+    constructor(name: string) {
+        super(name);  // Parent constructor must execute first
+    }
+}
+
+
+================================================================================
+8. POLYMORPHISM
+================================================================================
+
+RUNTIME POLYMORPHISM (Most common in TypeScript):
+--------------------------------------------------------------------------------
+Parent:
+class Browser {
+    launch() {}
+}
+
+Child:
+class Chrome extends Browser {
+    override launch() {}
+}
+
+Child:
+class Edge extends Browser {
+    override launch() {}
+}
+
+Usage:
+let browser: Browser;
+browser = new Chrome();
+browser.launch();  // Runtime decides which launch() executes
+
+METHOD OVERLOADING:
+--------------------------------------------------------------------------------
+TypeScript supports:
+method(a: string): void;
+method(a: number): void;
+
+But: Only One Implementation Exists (unlike Java)
+
+OPTIONS OBJECT PATTERN (NOT Polymorphism):
+--------------------------------------------------------------------------------
+click({
+    force: true,
+    timeout: 5000
+});
+
+This is NOT polymorphism.
+This is the Options Object Pattern.
+
+
+================================================================================
+9. OPTIONS OBJECT PATTERN
+================================================================================
+
+WHY USE IT?
+--------------------------------------------------------------------------------
+BAD:
+click(true, 5000, 2);  // Meaning unclear
+
+GOOD:
+click({
+    force: true,
+    timeout: 5000
+});  // Readable and self-documenting
+
+Playwright uses this heavily throughout its API.
+
+
+================================================================================
+10. ABSTRACTION
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Hide Implementation, Expose Functionality.
+
+PLAYWRIGHT EXAMPLE:
+await page.click();
+
+You know: Click Happens
+You don't know: Mouse Events, Scroll Logic, Visibility Checks
+
+Implementation is hidden.
+
+ABSTRACT CLASS:
+--------------------------------------------------------------------------------
+abstract class BasePage {
+    abstract verifyPage(): void;
+}
+
+class LoginPage extends BasePage {
+    override verifyPage() {}
+}
+
+DIFFERENCE:
+  Encapsulation: Hide Data
+  Abstraction: Hide Implementation
+
+
+================================================================================
+11. INTERFACE
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+A Contract.
+
+interface RBI {
+    deposit(): void;
+    withdraw(): void;
+}
+
+Defines WHAT, not HOW.
+
+REAL BANKING ANALOGY:
+RBI (Interface) says:
+  Every Bank Must Support:
+  • Deposit
+  • Withdraw
+  • Open Account
+
+Implementation is hidden by each bank.
+
+
+================================================================================
+12. ABSTRACT CLASS
+================================================================================
+
+ANALOGY:
+Axis Headquarters → Abstract Class
+
+Provides:
+  • Common Rules
+  • Common Implementation
+
+EXAMPLE:
+abstract class AxisBank {
+    sendOTP() {
+        console.log("OTP Sent");
+    }
+
+    abstract deposit(): void;
+}
+
+
+================================================================================
+13. INTERFACE vs ABSTRACT CLASS
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Feature                    │ Interface          │ Abstract Class           │
+├────────────────────────────┼────────────────────┼──────────────────────────┤
+│ Variables                  │ Contract Only      │ Real Variables           │
+│ Constructor                │ ❌ Not Allowed     │ ✅ Allowed               │
+│ Object Creation            │ ❌ Not Allowed     │ ❌ Not Allowed           │
+│ Concrete Methods           │ ❌ Not Allowed     │ ✅ Allowed               │
+│ Abstract Methods           │ ✅ Allowed         │ ✅ Allowed               │
+│ Runtime Existence          │ ❌ No              │ ✅ Yes                   │
+│ Access Modifiers           │ ❌ Not Allowed     │ ✅ Allowed               │
+└────────────────────────────┴────────────────────┴──────────────────────────┘
+
+
+================================================================================
+14. KEYWORDS
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Relationship                    │ Keyword                                   │
+├─────────────────────────────────┼───────────────────────────────────────────┤
+│ Interface → Interface           │ extends                                   │
+│ Class → Interface               │ implements                                │
+│ Abstract Class → Interface      │ implements                                │
+│ Class → Abstract Class          │ extends                                   │
+│ Abstract Class → Abstract Class │ extends                                   │
+└─────────────────────────────────┴───────────────────────────────────────────┘
+
+
+================================================================================
+15. METHOD OVERRIDING
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Same Method, Same Parameters, Parent → Child
+
+EXAMPLE:
+class BasePage {
+    verifyPage() {}
+}
+
+class LoginPage extends BasePage {
+    override verifyPage() {}
+}
+
+MODERN TYPESCRIPT RECOMMENDATION:
+--------------------------------------------------------------------------------
+Use 'override' keyword.
+
+override verifyPage() {}
+
+Benefits: Compiler catches mistakes.
+
+
+================================================================================
+16. ACCESS MODIFIER INTERVIEW TRAP
+================================================================================
+
+QUESTION:
+const obj = new BaseClass();
+obj.privateMethod();  // Why not allowed?
+
+WRONG ANSWER: "Because object cannot access."
+
+CORRECT ANSWER: "Because caller is outside the class."
+
+Access Modifiers check CALLER LOCATION, not Object Ownership.
+
+
+================================================================================
+FINAL OOP HIERARCHY
+================================================================================
+
+RBI
+(Interface)
+      ↑
+implements
+
+Axis Headquarters
+(Abstract Class)
+      ↑
+extends
+
+Axis Chennai Branch
+(Concrete Class)
+
+MEMORY RULE:
+--------------------------------------------------------------------------------
+Interface       → Contract Only
+Abstract Class  → Contract + Partial Implementation
+Concrete Class  → Complete Implementation
+
+
+MOST IMPORTANT TAKEAWAYS
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concept          │ Summary                                                  │
+├──────────────────┼──────────────────────────────────────────────────────────┤
+│ Class            │ Blueprint                                                │
+│ Object           │ Instance                                                 │
+│ Constructor      │ Initialization                                           │
+│ Access Modifiers │ Scope Based (NOT Object Based)                           │
+│ Inheritance      │ Code Reuse                                               │
+│ Polymorphism     │ Runtime Behavior Change                                  │
+│ Abstraction      │ Hide Implementation                                      │
+│ Interface        │ Pure Contract                                            │
+│ Abstract Class   │ Contract + Common Logic                                  │
+│ Method Overriding│ Runtime Polymorphism                                     │
+└──────────────────┴──────────────────────────────────────────────────────────┘
+
+These concepts form the foundation for understanding:
+  • Advanced Playwright framework design
+  • Page Object Model (POM)
+  • Fixtures
+  • Wrappers
+  • Reusable automation architecture
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
