@@ -1,0 +1,371 @@
+📑 Agenda – Day 12 | Playwright MCP and Page Object Model
+
+================================================================================
+              PLAYWRIGHT DESIGN PATTERNS & FIXTURE PATTERN
+================================================================================
+
+
+1. WHAT IS A DESIGN PATTERN?
+================================================================================
+
+A Design Pattern is a reusable solution to a commonly occurring software design
+problem.
+
+Instead of writing everything in one class or one test, we divide the
+application into multiple reusable components.
+
+BENEFITS:
+--------------------------------------------------------------------------------
+  • Improves code readability
+  • Reduces duplicate code
+  • Easier maintenance
+  • Better scalability
+  • Easier debugging
+  • Encourages code reusability
+
+
+================================================================================
+              2. DESIGN PATTERNS USED IN PLAYWRIGHT FRAMEWORK
+================================================================================
+
+COMMONLY USED PATTERNS:
+--------------------------------------------------------------------------------
+  1. Page Object Model (POM)
+  2. Fixture Pattern
+  3. Builder Pattern
+  4. Factory Pattern
+  5. Singleton Pattern
+  6. Repository Pattern
+  7. Strategy Pattern
+  8. Dependency Injection (through Fixtures)
+  9. Facade Pattern
+  10. Command Pattern
+
+RECOMMENDED LEARNING ORDER:
+--------------------------------------------------------------------------------
+Page Object Model
+        ↓
+Fixture Pattern
+        ↓
+Dependency Injection
+        ↓
+Builder Pattern
+        ↓
+Factory Pattern
+        ↓
+Singleton Pattern
+        ↓
+Repository Pattern
+        ↓
+Strategy Pattern
+        ↓
+Facade Pattern
+        ↓
+Command Pattern
+
+
+================================================================================
+                    3. WHAT IS THE FIXTURE PATTERN?
+================================================================================
+
+A Fixture is an object or resource that Playwright creates before the test
+execution and provides automatically to the test.
+
+Instead of manually creating objects inside every test, Playwright prepares
+them for us.
+
+WITHOUT FIXTURES:
+--------------------------------------------------------------------------------
+Every test creates its own page objects.
+
+const loginPage = new LoginPage(page);
+const homePage = new HomePage(page);
+
+This leads to duplicate code across multiple test files.
+
+WITH FIXTURES:
+--------------------------------------------------------------------------------
+Playwright automatically provides the required page objects.
+
+test('Create Lead', async ({ SFlogin, SFhome }) => {
+    // No manual object creation needed
+});
+
+No manual object creation is required.
+
+
+================================================================================
+                    4. UNDERSTANDING THE FIXTURE CODE
+================================================================================
+
+import { test as baseTest } from '@playwright/test';
+
+WHY RENAME test?
+--------------------------------------------------------------------------------
+Playwright already provides a built-in test.
+
+We rename it to baseTest because we are going to extend it with our own custom
+fixtures.
+
+CREATING CUSTOM FIXTURE TYPE:
+--------------------------------------------------------------------------------
+type SalesforceFixture = {
+    SFlogin: LoginPage,
+    SFhome: HomePage
+}
+
+This tells TypeScript that our tests will receive two additional objects:
+  • SFlogin
+  • SFhome
+
+Along with Playwright's built-in fixtures like:
+  • page
+  • browser
+  • context
+
+
+================================================================================
+                    5. EXTENDING PLAYWRIGHT TEST
+================================================================================
+
+baseTest.extend<SalesforceFixture>({
+
+This extends Playwright's built-in test object.
+
+After extension, the test receives both built-in and custom fixtures.
+
+
+================================================================================
+                    6. CREATING THE LOGIN PAGE FIXTURE
+================================================================================
+
+SFlogin: async ({ page }, use) => {
+    const loginPage = new LoginPage(page);
+    await use(loginPage);
+}
+
+STEP-BY-STEP FLOW:
+--------------------------------------------------------------------------------
+STEP 1: Playwright creates the built-in page object
+        Playwright → page
+
+STEP 2: The fixture receives the page
+        new LoginPage(page)
+
+STEP 3: The LoginPage object is created
+        LoginPage
+
+STEP 4: The object is passed to the test using:
+        await use(loginPage)
+
+
+================================================================================
+                    7. PURPOSE OF use()
+================================================================================
+
+use() is responsible for making the created object available to the test.
+
+WITHOUT use():
+--------------------------------------------------------------------------------
+const loginPage = new LoginPage(page);
+// The object exists only inside the fixture
+// The test cannot access it
+
+WITH use():
+--------------------------------------------------------------------------------
+await use(loginPage);
+// The object becomes available as SFlogin inside the test
+
+
+================================================================================
+                    8. COMPLETE EXECUTION FLOW
+================================================================================
+
+Test Starts
+      │
+      ▼
+Playwright Creates Browser
+      │
+      ▼
+Creates Context
+      │
+      ▼
+Creates Page
+      │
+      ▼
+Calls SFlogin Fixture
+      │
+      ▼
+Creates LoginPage Object
+      │
+      ▼
+await use(loginPage)
+      │
+      ▼
+Calls SFhome Fixture
+      │
+      ▼
+Creates HomePage Object
+      │
+      ▼
+await use(homePage)
+      │
+      ▼
+Both Objects Are Passed To Test
+      │
+      ▼
+Test Executes
+      │
+      ▼
+Fixture Cleanup (if any)
+
+
+================================================================================
+                    9. TEST EXECUTION
+================================================================================
+
+The test becomes much cleaner:
+
+test('Create Lead', async ({ SFlogin, SFhome }) => {
+    await SFlogin.enterUrl(url);
+    await SFlogin.enterUsername(username);
+    await SFlogin.enterPassword(password);
+    await SFlogin.clickLogin();
+    await SFhome.clickLeads();
+});
+
+No object creation is needed inside the test.
+
+
+================================================================================
+                    10. WHY USE FIXTURES?
+================================================================================
+
+WITHOUT FIXTURES:
+--------------------------------------------------------------------------------
+Test 1 → new LoginPage() → new HomePage()
+Test 2 → new LoginPage() → new HomePage()
+Test 3 → new LoginPage() → new HomePage()
+
+Repeated code in every test.
+
+WITH FIXTURES:
+--------------------------------------------------------------------------------
+Fixture
+    ↓
+Creates LoginPage
+    ↓
+Creates HomePage
+    ↓
+All Tests Reuse Them
+
+Centralized object creation.
+
+
+================================================================================
+                    11. RELATION TO DEPENDENCY INJECTION (DI)
+================================================================================
+
+WITHOUT DEPENDENCY INJECTION:
+--------------------------------------------------------------------------------
+const loginPage = new LoginPage(page);
+// The test creates the object
+
+WITH DEPENDENCY INJECTION (Fixture Pattern):
+--------------------------------------------------------------------------------
+test('...', async ({ SFlogin }) => {
+    // Playwright creates the object and injects it into the test
+});
+
+
+================================================================================
+                    12. BENEFITS OF FIXTURE PATTERN
+================================================================================
+
+  • Eliminates duplicate object creation
+  • Centralizes initialization logic
+  • Produces cleaner test scripts
+  • Improves maintainability
+  • Simplifies dependency management
+  • Makes tests easier to read
+  • Supports automatic setup and cleanup
+  • Enables dependency injection
+
+
+================================================================================
+                    13. REAL-TIME ANALOGY
+================================================================================
+
+WITHOUT FIXTURE:
+--------------------------------------------------------------------------------
+A guest checks into a hotel and has to:
+  • Build the room
+  • Buy the bed
+  • Install the AC
+  • Arrange the furniture
+
+Only then can they stay.
+
+WITH FIXTURE:
+--------------------------------------------------------------------------------
+The hotel prepares the room before the guest arrives.
+
+The guest simply checks in and uses the room.
+
+Similarly, Playwright prepares the required page objects before the test begins.
+
+
+================================================================================
+                    14. BEST PRACTICE
+================================================================================
+
+Export the extended test and expect from the fixture file:
+
+import { test as base, expect } from '@playwright/test';
+
+export const test = base.extend<SalesforceFixture>({
+    // Custom Fixtures
+});
+
+export { expect };
+
+Then import the customized test in your test files instead of importing directly
+from @playwright/test.
+
+
+================================================================================
+                    KEY INTERVIEW QUESTIONS
+================================================================================
+
+Q1: What is a Fixture in Playwright?
+--------------------------------------------------------------------------------
+A Fixture is a reusable setup object or resource that Playwright creates before
+a test executes and automatically injects into the test.
+
+Q2: Why do we use Fixtures?
+--------------------------------------------------------------------------------
+To avoid duplicate setup code, centralize object creation, improve
+maintainability, and support dependency injection.
+
+Q3: What is the purpose of use()?
+--------------------------------------------------------------------------------
+use() passes the created fixture object to the test. Without calling use(),
+the fixture is created but never becomes available to the test.
+
+Q4: Is page a Fixture?
+--------------------------------------------------------------------------------
+Yes. page is one of Playwright's built-in fixtures. Custom fixtures often
+depend on it to create page objects.
+
+Q5: How is the Fixture Pattern related to Dependency Injection?
+--------------------------------------------------------------------------------
+Fixtures implement Dependency Injection by allowing Playwright to create and
+supply required objects to tests, rather than having tests instantiate those
+objects themselves.
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
+
+
+
