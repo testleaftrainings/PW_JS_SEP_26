@@ -1,0 +1,1868 @@
+📑 Agenda – Day 14 | API integration with Playwright
+
+================================================================================
+                        1. HTTP HEADERS
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+HTTP Headers are key-value pairs that provide metadata about an HTTP request
+or response.
+
+INTERVIEW DEFINITION:
+  "HTTP Headers are key-value pairs sent with HTTP requests and responses that
+   carry metadata about the message."
+
+HTTP REQUEST STRUCTURE:
+--------------------------------------------------------------------------------
+GET /users/101 HTTP/1.1
+
+Host: api.company.com
+Authorization: Bearer token
+Content-Type: application/json
+Accept: application/json
+
+Body
+
+WHY HEADERS?
+--------------------------------------------------------------------------------
+Headers tell the server:
+  • Who is making the request?
+  • What format is the data?
+  • What response format is expected?
+  • Is the user authenticated?
+
+COMMON REQUEST HEADERS:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Header          │ Purpose                                                    │
+├─────────────────┼────────────────────────────────────────────────────────────┤
+│ Content-Type    │ Format of request body                                    │
+│ Accept          │ Expected response format                                  │
+│ Authorization   │ Authentication                                            │
+│ Host            │ Target server                                             │
+│ User-Agent      │ Client information                                        │
+│ Cookie          │ Session management                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+COMMON RESPONSE HEADERS:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Header          │ Purpose                                                    │
+├─────────────────┼────────────────────────────────────────────────────────────┤
+│ Content-Type    │ Response format                                            │
+│ Content-Length  │ Size of response                                           │
+│ Cache-Control   │ Caching rules                                              │
+│ Set-Cookie      │ Creates cookies                                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CONTENT-TYPE vs ACCEPT:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Content-Type                │ Accept                                         │
+├─────────────────────────────┼────────────────────────────────────────────────┤
+│ Format of request body      │ Expected response format                       │
+│ "I'm sending..."            │ "I want to receive..."                         │
+└─────────────────────────────┴────────────────────────────────────────────────┘
+
+
+================================================================================
+                    2. HTTP METHODS & CRUD OPERATIONS
+================================================================================
+
+WHAT ARE HTTP METHODS?
+--------------------------------------------------------------------------------
+HTTP Methods (HTTP Verbs) specify what action the client wants the server to
+perform on a resource.
+
+WHAT IS A RESOURCE?
+--------------------------------------------------------------------------------
+A resource represents any data exposed by a Web Service.
+
+Examples:
+  /users
+  /orders
+  /products
+  /employees
+
+CRUD MAPPING:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ CRUD          │ HTTP Method                                                 │
+├───────────────┼─────────────────────────────────────────────────────────────┤
+│ Create        │ POST                                                        │
+│ Read          │ GET                                                         │
+│ Update        │ PUT / PATCH                                                 │
+│ Delete        │ DELETE                                                      │
+└───────────────┴─────────────────────────────────────────────────────────────┘
+
+GET:
+--------------------------------------------------------------------------------
+Purpose: Retrieve data
+Example: GET /employees/101
+Characteristics: Read only, Safe, No data modification
+
+POST:
+--------------------------------------------------------------------------------
+Purpose: Create new resource
+Example: POST /employees
+
+PUT:
+--------------------------------------------------------------------------------
+Purpose: Replace the entire resource
+Example: PUT /employees/101
+
+PATCH:
+--------------------------------------------------------------------------------
+Purpose: Update selected fields
+Example: PATCH /employees/101
+
+DELETE:
+--------------------------------------------------------------------------------
+Purpose: Delete a resource
+Example: DELETE /employees/101
+
+PUT vs PATCH:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ PUT                          │ PATCH                                         │
+├──────────────────────────────┼───────────────────────────────────────────────┤
+│ Replaces entire resource     │ Updates selected fields                       │
+│ Sends complete object        │ Sends modified fields only                    │
+└──────────────────────────────┴───────────────────────────────────────────────┘
+
+
+
+
+================================================================================
+                        3. PARAMETERIZATION
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+Parameterization is the process of sending dynamic values to an API so that
+the same endpoint can handle different requests.
+
+TYPES OF PARAMETERIZATION:
+--------------------------------------------------------------------------------
+1. Path Parameter:
+   Example: GET /employees/101
+   101 is the path parameter.
+   Purpose: Identify a specific resource.
+
+2. Query Parameter:
+   Example: GET /employees?department=QA
+   Purpose: Filter, search, sort, paginate.
+
+3. Header Parameter:
+   Example: Authorization: Bearer token
+   Purpose: Send metadata.
+
+4. Body Parameter:
+   Example: { "name": "John", "department": "QA" }
+   Purpose: Send business data.
+
+5. Form Parameter:
+   Examples: Login forms, Registration forms, File uploads
+   Content Types: application/x-www-form-urlencoded, multipart/form-data
+
+PATH vs QUERY PARAMETER:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Path Parameter              │ Query Parameter                               │
+├─────────────────────────────┼───────────────────────────────────────────────┤
+│ Identifies resource         │ Filters resources                             │
+│ Mandatory                   │ Usually optional                              │
+│ Part of URL                 │ After ?                                       │
+└─────────────────────────────┴───────────────────────────────────────────────┘
+
+================================================================================
+                        4. HTTP STATUS CODES
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+HTTP Status Codes are 3-digit numbers returned by the server indicating the
+outcome of processing an HTTP request.
+
+CATEGORIES:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Range         │ Meaning                                                    │
+├───────────────┼────────────────────────────────────────────────────────────┤
+│ 1xx           │ Informational                                              │
+│ 2xx           │ Success                                                    │
+│ 3xx           │ Redirection                                                │
+│ 4xx           │ Client Error                                               │
+│ 5xx           │ Server Error                                               │
+└───────────────┴────────────────────────────────────────────────────────────┘
+
+COMMON STATUS CODES:
+--------------------------------------------------------------------------------
+200 OK           → Request successful
+201 Created      → New resource created
+204 No Content   → Operation successful (no response body)
+
+400 Bad Request  → Invalid request
+401 Unauthorized → Authentication required or invalid credentials
+403 Forbidden    → Authenticated but lacks permission
+404 Not Found    → Requested resource doesn't exist
+
+500 Internal Server Error → Unexpected server failure
+503 Service Unavailable   → Server temporarily unavailable
+
+401 vs 403:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 401                         │ 403                                           │
+├─────────────────────────────┼───────────────────────────────────────────────┤
+│ Authentication required     │ Authentication successful but authorization  │
+│ or invalid credentials      │ failed                                        │
+└─────────────────────────────┴───────────────────────────────────────────────┘
+
+200 vs 201:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 200                         │ 201                                           │
+├─────────────────────────────┼───────────────────────────────────────────────┤
+│ Success                     │ Resource created                              │
+└─────────────────────────────┴───────────────────────────────────────────────┘
+
+
+
+================================================================================
+                        5. URL ANATOMY
+================================================================================
+
+EXAMPLE:
+--------------------------------------------------------------------------------
+https://dev324532.service-now.com/api/now/table/incident
+
+PROTOCOL:
+--------------------------------------------------------------------------------
+https
+Defines how communication happens.
+Examples: HTTP, HTTPS, FTP
+
+DOMAIN / HOST:
+--------------------------------------------------------------------------------
+dev324532.service-now.com
+Identifies the server.
+
+Components:
+  dev324532  → Subdomain
+  service-now → Domain
+  com        → Top-level domain
+
+PATH:
+--------------------------------------------------------------------------------
+/api/now/table/incident
+
+Breakdown:
+  /api      → API module
+  /now      → ServiceNow namespace
+  /table    → Table API
+  /incident → Incident resource
+
+COMPLETE INTERPRETATION:
+--------------------------------------------------------------------------------
+"Using HTTPS, connect to the ServiceNow instance dev324532, access the Table
+API, and work with the Incident table."
+
+BASE URL:
+--------------------------------------------------------------------------------
+https://dev324532.service-now.com
+
+Common root address. Usually remains constant.
+
+ENDPOINT:
+--------------------------------------------------------------------------------
+/api/now/table/incident
+
+Represents a specific resource or API.
+
+Examples:
+  /api/now/table/user
+  /api/now/table/problem
+  /api/now/table/change_request
+
+
+================================================================================
+                        6. URL vs URI
+================================================================================
+
+URI (Uniform Resource Identifier):
+--------------------------------------------------------------------------------
+Identifies a resource.
+Example: /users/101
+
+URL (Uniform Resource Locator):
+--------------------------------------------------------------------------------
+Identifies AND locates a resource.
+Example: https://example.com/users/101
+
+RELATIONSHIP:
+--------------------------------------------------------------------------------
+                 URI
+               /     \
+              /       \
+        URL           URN
+
+Every URL is a URI, but not every URI is a URL.
+
+URI vs URL:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ URI                          │ URL                                           │
+├──────────────────────────────┼───────────────────────────────────────────────┤
+│ Identifies resource          │ Identifies and locates resource              │
+│ May not include protocol     │ Includes protocol and host                   │
+│ Broader concept              │ Specific type of URI                         │
+└──────────────────────────────┴───────────────────────────────────────────────┘
+
+
+================================================================================
+                        7. COMPLETE REST API FLOW
+================================================================================
+
+                  Client
+                     │
+                     ▼
+             HTTP Method
+      (GET / POST / PUT / PATCH / DELETE)
+                     │
+                     ▼
+                 HTTP Request
+        ┌─────────────────────────┐
+        │ URL                     │
+        │ Path Parameters         │
+        │ Query Parameters        │
+        │ Headers                 │
+        │ Body (if applicable)    │
+        └─────────────────────────┘
+                     │
+                     ▼
+                Web Service
+                     │
+             Business Logic
+                     │
+                 Database
+                     │
+                     ▼
+               HTTP Response
+        ┌─────────────────────────┐
+        │ Status Code             │
+        │ Headers                 │
+        │ Body                    │
+        └─────────────────────────┘
+                     │
+                     ▼
+                   Client
+
+
+================================================================================
+                    INTERVIEW QUESTIONS
+================================================================================
+
+Q1: What is a Web Service?
+--------------------------------------------------------------------------------
+A software component that enables different applications to communicate and
+exchange data over a network using standard web protocols like HTTP.
+
+Q2: Why are Web Services important in Microservices?
+--------------------------------------------------------------------------------
+Microservices are independent applications that communicate over a network.
+They use Web Services (REST/SOAP APIs) to exchange data.
+
+Q3: What are HTTP Headers?
+--------------------------------------------------------------------------------
+Key-value pairs containing metadata about an HTTP request or response.
+
+Q4: Difference between Content-Type and Accept?
+--------------------------------------------------------------------------------
+Content-Type: Format of the request body.
+Accept: Format expected in the response.
+
+Q5: What are HTTP Methods?
+--------------------------------------------------------------------------------
+HTTP Methods define the action the client wants the server to perform on a
+resource.
+
+Q6: Map CRUD operations to HTTP methods.
+--------------------------------------------------------------------------------
+CREATE → POST
+READ   → GET
+UPDATE → PUT / PATCH
+DELETE → DELETE
+
+Q7: Difference between PUT and PATCH?
+--------------------------------------------------------------------------------
+PUT: Replaces the entire resource.
+PATCH: Updates only specified fields.
+
+Q8: What are HTTP Status Codes?
+--------------------------------------------------------------------------------
+Three-digit numbers returned by the server indicating the outcome of processing
+a request.
+
+Q9: Difference between 401 and 403?
+--------------------------------------------------------------------------------
+401: Authentication required or invalid.
+403: Authenticated but not authorized.
+
+Q10: Difference between Path Parameter and Query Parameter?
+--------------------------------------------------------------------------------
+Path Parameter: Identifies a specific resource.
+Query Parameter: Filters or modifies the result.
+
+Q11: Difference between URI and URL?
+--------------------------------------------------------------------------------
+URI: Identifies a resource.
+URL: Identifies and locates a resource.
+
+
+================================================================================
+                          QUICK REVISION SHEET
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concept          │ Key Point                                               │
+├──────────────────┼─────────────────────────────────────────────────────────┤
+│ Web Service      │ Enables communication between applications             │
+│ Monolithic       │ Single application                                      │
+│ Microservices    │ Multiple independent services communicating via APIs   │
+│ HTTP Header      │ Metadata about request/response                        │
+│ GET              │ Read                                                    │
+│ POST             │ Create                                                  │
+│ PUT              │ Replace entire resource                                 │
+│ PATCH            │ Partial update                                          │
+│ DELETE           │ Remove resource                                         │
+│ 200              │ Success                                                 │
+│ 201              │ Created                                                 │
+│ 204              │ No Content                                              │
+│ 400              │ Bad Request                                             │
+│ 401              │ Unauthorized                                            │
+│ 403              │ Forbidden                                               │
+│ 404              │ Not Found                                               │
+│ 500              │ Internal Server Error                                   │
+│ Path Parameter   │ Identifies a resource                                   │
+│ Query Parameter  │ Filters/searches resources                              │
+│ Header Parameter │ Metadata                                                │
+│ Body Parameter   │ Business data                                           │
+│ Base URL         │ Common root address                                     │
+│ Endpoint         │ Specific API path                                       │
+│ URI              │ Identifies resource                                     │
+│ URL              │ Identifies and locates resource                         │
+└──────────────────┴─────────────────────────────────────────────────────────┘
+
+
+================================================================================
+                             KEY TAKEAWAYS
+================================================================================
+
+  • A Web Service enables communication between applications over HTTP/HTTPS.
+  • Microservices rely on Web Services for inter-service communication.
+  • An HTTP request consists of a Method, URL, Headers, and optionally a Body.
+  • HTTP Headers carry metadata, while the Body carries business data.
+  • HTTP Methods define CRUD operations.
+  • HTTP Status Codes communicate the result of a request.
+  • Parameterization makes APIs dynamic through Path, Query, Header, Body,
+    and Form parameters.
+  • A Base URL identifies the API server, while an Endpoint identifies a
+    specific resource.
+  • Every URL is a URI, but not every URI is a URL.
+
+================================================================================
+                         WEB SERVICES 
+================================================================================
+
+Topics Covered:
+  • ServiceNow Overview
+  • ServiceNow Architecture
+  • ServiceNow REST APIs
+  • Incident Management
+  • ServiceNow UI vs REST API
+  • Incident Form Field Explanation
+  • ServiceNow Record Creation Flow
+
+
+================================================================================
+                        1. SERVICENOW
+================================================================================
+
+WHAT IS SERVICENOW?
+--------------------------------------------------------------------------------
+ServiceNow is a cloud-based enterprise workflow automation platform that helps
+organizations automate IT and business processes.
+
+Initially designed for IT Service Management (ITSM), it now supports multiple
+business functions.
+
+COMMON MODULES:
+--------------------------------------------------------------------------------
+  • Incident Management
+  • Problem Management
+  • Change Management
+  • Asset Management
+  • CMDB (Configuration Management Database)
+  • HR Service Delivery
+  • Customer Service Management
+  • Knowledge Management
+
+EVERYTHING IS STORED IN TABLES:
+--------------------------------------------------------------------------------
+ServiceNow stores business data in database tables.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Table          │ Purpose                                                    │
+├────────────────┼────────────────────────────────────────────────────────────┤
+│ incident       │ Incident records                                           │
+│ problem        │ Problem records                                            │
+│ change_request │ Change records                                             │
+│ sys_user       │ Users                                                      │
+│ cmdb_ci        │ Configuration Items                                        │
+└────────────────┴────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+                    2. WHY SERVICENOW USES REST APIS
+================================================================================
+
+Different enterprise applications need to communicate with ServiceNow.
+
+Examples:
+  • Microsoft Teams
+  • Jira
+  • Azure DevOps
+  • SAP
+  • AWS
+  • Monitoring Tools
+
+REST APIs enable these applications to:
+  • Create records
+  • Read records
+  • Update records
+  • Delete records
+
+without opening the ServiceNow UI.
+
+EXAMPLE:
+--------------------------------------------------------------------------------
+Monitoring Tool detects: Server Down
+       ↓
+Calls: POST /api/now/table/incident
+       ↓
+ServiceNow automatically creates: INC0010056
+
+
+================================================================================
+                        3. SERVICENOW REST APIS
+================================================================================
+
+TABLE API:
+--------------------------------------------------------------------------------
+The Table API is the most commonly used REST API in ServiceNow.
+
+Example: POST /api/now/table/incident
+
+Used for CRUD operations on ServiceNow tables.
+
+OTHER COMMON APIS:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ API            │ Purpose                                                    │
+├────────────────┼────────────────────────────────────────────────────────────┤
+│ Table API      │ CRUD operations                                            │
+│ Attachment API │ Upload/download files                                      │
+│ Import Set API │ Bulk import                                                │
+│ Aggregate API  │ Count, Sum, Average                                        │
+│ Batch API      │ Execute multiple requests                                  │
+└────────────────┴────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+                    4. UNDERSTANDING A SERVICENOW API URL
+================================================================================
+
+EXAMPLE:
+--------------------------------------------------------------------------------
+https://dev324532.service-now.com/api/now/table/incident
+
+BREAKDOWN:
+--------------------------------------------------------------------------------
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Part                        │ Meaning                                       │
+├─────────────────────────────┼───────────────────────────────────────────────┤
+│ https                       │ Secure communication protocol                │
+│ dev324532.service-now.com   │ ServiceNow instance                           │
+│ /api                        │ REST API module                               │
+│ /now                        │ API namespace                                 │
+│ /table                      │ Table API                                     │
+│ /incident                   │ Incident table                                │
+└─────────────────────────────┴───────────────────────────────────────────────┘
+
+
+================================================================================
+                    5. CREATING AN INCIDENT FROM THE UI
+================================================================================
+
+STEPS:
+--------------------------------------------------------------------------------
+1. Login to ServiceNow
+2. Open the Application Navigator
+3. Search for: Incident
+4. Click: Create New
+5. Fill the mandatory fields
+6. Click Submit
+7. ServiceNow creates the incident record
+
+
+================================================================================
+                    6. INCIDENT FORM FIELDS
+================================================================================
+
+NUMBER:
+--------------------------------------------------------------------------------
+Example: INC0010007
+
+  • Automatically generated
+  • Business identifier
+  • Generated before the record is saved
+  • Not supplied while creating records through REST APIs
+
+CALLER (⭐ Important):
+--------------------------------------------------------------------------------
+Represents: Who reported the issue?
+
+REST field: caller_id
+
+CATEGORY:
+--------------------------------------------------------------------------------
+Represents the type of issue.
+
+Examples: Hardware, Software, Network, Inquiry
+
+SUBCATEGORY:
+--------------------------------------------------------------------------------
+Provides a more specific classification.
+
+Example: Hardware → Laptop
+
+SERVICE:
+--------------------------------------------------------------------------------
+Business service affected.
+
+Examples: VPN, Office365, SAP
+
+SERVICE OFFERING:
+--------------------------------------------------------------------------------
+Specific offering within a business service.
+
+Example: Office365 → Outlook, Teams, OneDrive
+
+CONFIGURATION ITEM (CI):
+--------------------------------------------------------------------------------
+Represents the affected asset.
+
+Examples: Laptop, Server, Database, Network Device
+
+Information comes from the CMDB.
+
+CHANNEL:
+--------------------------------------------------------------------------------
+Indicates how the incident was created.
+
+Examples: Portal, Phone, Email, REST API, Monitoring Tool
+
+STATE:
+--------------------------------------------------------------------------------
+Represents the lifecycle of an incident.
+
+  New → In Progress → On Hold → Resolved → Closed
+
+IMPACT:
+--------------------------------------------------------------------------------
+Represents: How many users or business services are affected?
+
+Values: High, Medium, Low
+
+URGENCY:
+--------------------------------------------------------------------------------
+Represents: How quickly must the issue be resolved?
+
+Values: High, Medium, Low
+
+PRIORITY:
+--------------------------------------------------------------------------------
+Automatically calculated by ServiceNow.
+
+Generally derived from: Impact + Urgency
+
+Users normally do not edit this directly.
+
+ASSIGNMENT GROUP:
+--------------------------------------------------------------------------------
+Represents the team responsible for resolving the incident.
+
+Examples: Network Team, Windows Team, Database Team
+
+ASSIGNED TO:
+--------------------------------------------------------------------------------
+Specific engineer responsible for the incident.
+
+SHORT DESCRIPTION (⭐ Mandatory):
+--------------------------------------------------------------------------------
+Provides a one-line summary of the issue.
+
+Example: "Laptop not booting"
+
+DESCRIPTION:
+--------------------------------------------------------------------------------
+Detailed explanation of the issue.
+
+
+================================================================================
+                    7. UI FIELDS vs REST API FIELDS
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ UI Field           │ REST API Field                                         │
+├────────────────────┼────────────────────────────────────────────────────────┤
+│ Caller             │ caller_id                                              │
+│ Category           │ category                                               │
+│ Subcategory        │ subcategory                                            │
+│ Configuration Item │ cmdb_ci                                                │
+│ Assignment Group   │ assignment_group                                       │
+│ Assigned To        │ assigned_to                                            │
+│ Short Description  │ short_description                                      │
+│ Description        │ description                                            │
+└────────────────────┴────────────────────────────────────────────────────────┘
+
+The UI displays user-friendly labels, while the REST API uses the underlying
+database column names.
+
+
+================================================================================
+                    8. WHAT HAPPENS WHEN YOU CLICK SUBMIT?
+================================================================================
+
+User
+  ↓
+Fill Incident Form
+  ↓
+Click Submit
+  ↓
+Validation
+  ↓
+Business Rules
+  ↓
+Incident Table
+  ↓
+Database
+  ↓
+Incident Created
+
+
+================================================================================
+                    9. VALIDATION BEFORE SAVING
+================================================================================
+
+Before inserting a record, ServiceNow validates all mandatory fields.
+
+Mandatory fields discussed:
+  • Caller
+  • Short Description
+
+If any mandatory field is missing:
+  • Validation fails
+  • The record is NOT inserted into the Incident table
+  • The user remains on the same page
+
+
+================================================================================
+                    10. IMPORTANT LEARNING
+================================================================================
+
+Seeing an Incident Number does NOT mean the record exists.
+
+EXAMPLE:
+--------------------------------------------------------------------------------
+Open New Incident
+       ↓
+ServiceNow displays: INC0010007
+       ↓
+User clicks Submit
+       ↓
+Mandatory fields missing
+       ↓
+Validation fails
+       ↓
+Record NOT saved
+
+The Incident Number is generated BEFORE saving.
+The record is inserted into the database ONLY after successful validation.
+
+
+================================================================================
+                    11. UI vs REST API
+================================================================================
+
+CREATING AN INCIDENT THROUGH THE UI:
+--------------------------------------------------------------------------------
+Login → Incident → Create New → Fill Form → Submit → Incident Created
+
+CREATING AN INCIDENT THROUGH REST API:
+--------------------------------------------------------------------------------
+POST /api/now/table/incident
+
+BOTH APPROACHES ULTIMATELY PERFORM THE SAME BUSINESS OPERATION:
+  → Insert a record into the Incident table.
+
+
+================================================================================
+                          QUICK REVISION
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concept            │ Remember                                              │
+├────────────────────┼───────────────────────────────────────────────────────┤
+│ ServiceNow         │ Enterprise workflow automation platform               │
+│ Data Storage       │ Information is stored in tables                       │
+│ Incident Table     │ Stores incident records                               │
+│ Table API          │ Used for CRUD operations                              │
+│ Incident URL       │ /api/now/table/incident                               │
+│ Caller             │ Person reporting the issue                            │
+│ Configuration Item │ Affected asset from CMDB                              │
+│ Assignment Group   │ Team responsible                                      │
+│ Short Description  │ Mandatory one-line summary                            │
+│ Submit             │ Triggers validation and record creation               │
+│ Validation         │ Mandatory fields checked before saving                │
+│ Incident Number    │ Generated before save; not proof record exists        │
+│ UI & REST          │ Both perform same database operation                  │
+└────────────────────┴───────────────────────────────────────────────────────┘
+
+
+================================================================================
+                             KEY TAKEAWAYS
+================================================================================
+
+  • ServiceNow stores business information in tables, and the Table API is the
+    primary REST interface for accessing those tables.
+
+  • External systems integrate with ServiceNow through REST APIs, eliminating
+    the need for manual UI interactions.
+
+  • An Incident can be created through either the UI or a REST API, but both
+    ultimately insert a record into the Incident table.
+
+  • The Incident form contains business fields (Caller, Category, Impact,
+    Urgency, Assignment Group, etc.), each mapping to corresponding database
+    fields used by the REST API.
+
+  • Clicking Submit does not immediately save the record. ServiceNow first
+    validates mandatory fields, executes business rules, and only then inserts
+    the record into the database.
+
+  • An Incident Number is generated before the record is saved. Therefore,
+    seeing an Incident Number alone does NOT guarantee that the record exists
+    in the database.
+
+
+
+================================================================================
+                         POSTMAN VARIABLES (pm.variables)
+================================================================================
+
+
+INTRODUCTION
+================================================================================
+
+If you're referring to pm.variables in Postman, it's used to get, set, and
+manage variables during API testing.
+
+WHAT ARE PM VARIABLES?
+================================================================================
+
+pm stands for Postman.
+
+pm.variables provides access to variables that Postman resolves during request
+execution.
+
+EXAMPLE:
+pm.variables.get("token");
+
+This retrieves the value of the variable named token.
+
+
+WHY DO WE NEED VARIABLES?
+================================================================================
+
+Imagine your Login API returns:
+{
+    "token": "abc123xyz"
+}
+
+Instead of hardcoding the token in every request, you can store it in a
+variable and reuse it.
+
+
+TYPES OF VARIABLES IN POSTMAN
+================================================================================
+
+Postman supports multiple variable scopes.
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Variable Type        │ Scope                 │ Lifetime                    │
+├──────────────────────┼───────────────────────┼─────────────────────────────┤
+│ Local Variable       │ Current request/script│ Temporary                   │
+│ Collection Variable  │ Entire collection     │ Until changed               │
+│ Environment Variable │ Current environment   │ Until changed               │
+│ Global Variable      │ All collections       │ Until changed               │
+└──────────────────────┴───────────────────────┴─────────────────────────────┘
+
+
+pm.variables
+================================================================================
+
+pm.variables looks for a variable in the available scopes (local, data,
+environment, collection, global) using Postman's variable resolution order.
+
+GET A VARIABLE:
+--------------------------------------------------------------------------------
+let token = pm.variables.get("token");
+console.log(token);
+
+SET A LOCAL VARIABLE:
+--------------------------------------------------------------------------------
+pm.variables.set("username", "John");
+
+This variable is available only during the current request execution.
+
+
+OTHER COMMON VARIABLE APIS
+================================================================================
+
+ENVIRONMENT VARIABLES:
+--------------------------------------------------------------------------------
+Set:   pm.environment.set("token", "abc123");
+Get:   let token = pm.environment.get("token");
+
+COLLECTION VARIABLES:
+--------------------------------------------------------------------------------
+Set:   pm.collectionVariables.set("token", "abc123");
+Get:   pm.collectionVariables.get("token");
+
+GLOBAL VARIABLES:
+--------------------------------------------------------------------------------
+Set:   pm.globals.set("token", "abc123");
+Get:   pm.globals.get("token");
+
+
+REAL EXAMPLE
+================================================================================
+
+LOGIN REQUEST:
+--------------------------------------------------------------------------------
+Response:
+{
+    "access_token": "........"
+}
+
+TESTS TAB:
+--------------------------------------------------------------------------------
+let response = pm.response.json();
+pm.environment.set("accessToken", response.access_token);
+
+NEXT API REQUEST:
+--------------------------------------------------------------------------------
+Headers:
+Authorization: Bearer {{accessToken}}
+
+Postman automatically replaces {{accessToken}} with the stored value.
+
+
+VARIABLE HIERARCHY (Highest to Lowest Priority)
+================================================================================
+
+Local Variables
+        ↓
+Data Variables
+        ↓
+Environment Variables
+        ↓
+Collection Variables
+        ↓
+Global Variables
+
+If the same variable name exists in multiple scopes, Postman uses the one with
+the highest priority.
+
+
+WHEN TO USE WHICH VARIABLE?
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Variable Type          │ Use Case                                          │
+├────────────────────────┼───────────────────────────────────────────────────┤
+│ Local (pm.variables)   │ Temporary values needed only during the current  │
+│                        │ request                                          │
+│ Environment            │ URLs, tokens, usernames for Dev/QA/Prod          │
+│ Collection             │ Values shared across all requests in a           │
+│                        │ collection                                       │
+│ Global                 │ Values used across multiple collections          │
+│                        │ (use sparingly)                                  │
+└────────────────────────┴───────────────────────────────────────────────────┘
+
+
+INTERVIEW QUESTION
+================================================================================
+
+Q: What is the difference between pm.variables and pm.environment?
+
+ANSWER:
+  • pm.variables accesses variables using Postman's variable resolution and is
+    commonly used for temporary, request-level values.
+
+  • pm.environment specifically accesses environment variables, which persist
+    in the selected environment until changed or deleted.
+
+
+QUICK REFERENCE
+================================================================================
+
+PM VARIABLES:
+--------------------------------------------------------------------------------
+  • pm is the Postman scripting object
+  • pm.variables.get() retrieves a variable using Postman's variable
+    resolution order
+  • pm.variables.set() creates a temporary local variable for the current
+    request execution
+
+COMMON METHODS:
+--------------------------------------------------------------------------------
+pm.variables.get("name");
+pm.variables.set("name", "value");
+
+pm.environment.get("token");
+pm.environment.set("token", "value");
+
+pm.collectionVariables.get("id");
+pm.collectionVariables.set("id", "1001");
+
+pm.globals.get("baseUrl");
+pm.globals.set("baseUrl", "https://api.example.com");
+
+BEST PRACTICES:
+--------------------------------------------------------------------------------
+  • Store base URLs and authentication tokens as Environment Variables
+  • Store shared collection data as Collection Variables
+  • Use pm.variables for temporary values needed only during a single request
+    execution
+
+
+================================================================================
+                           PLAYWRIGHT API TESTING 
+================================================================================
+
+Topic: Web Services Testing using Playwright (ServiceNow Examples)
+
+
+================================================================================
+                    1. INTRODUCTION TO PLAYWRIGHT API TESTING
+================================================================================
+
+Playwright is not limited to browser automation. It also provides built-in
+support for testing REST APIs.
+
+The APIRequestContext object is responsible for sending HTTP requests such as:
+  • GET
+  • POST
+  • PUT
+  • PATCH
+  • DELETE
+
+EXAMPLE:
+const response = await request.post(url, {
+    data: {
+        short_description: "Server Down"
+    }
+});
+
+
+================================================================================
+                    2. UNDERSTANDING THE post() METHOD
+================================================================================
+
+SYNTAX:
+--------------------------------------------------------------------------------
+post(
+    url: string,
+    options?: { ... }
+): Promise<APIResponse>
+
+The method contains:
+  • URL (Mandatory)
+  • Options (Optional)
+  • Returns an APIResponse
+
+URL:
+--------------------------------------------------------------------------------
+Represents the API endpoint where the request is sent.
+
+Example:
+const url = "https://devxxxx.service-now.com/api/now/table/incident";
+
+OPTIONS:
+--------------------------------------------------------------------------------
+The options parameter is optional.
+
+await request.post(url)
+await request.post(url, { ... })
+
+Both are valid.
+
+The options object contains additional information required by the API request.
+
+Common properties:
+  • headers
+  • data
+  • params
+  • form
+  • multipart
+  • timeout
+  • failOnStatusCode
+  • ignoreHTTPSErrors
+  • maxRedirects
+  • maxRetries
+
+
+================================================================================
+                    3. RETURN TYPE
+================================================================================
+
+Promise<APIResponse>
+
+Since the request is asynchronous, Playwright returns a Promise.
+
+Example:
+const response = await request.post(...)
+
+The response object contains:
+  • Status
+  • Headers
+  • Response Body
+  • Cookies
+
+
+================================================================================
+                    4. COMMON REQUEST OPTIONS
+================================================================================
+
+data:
+--------------------------------------------------------------------------------
+Represents the request body.
+
+Example:
+await request.post(url, {
+    data: {
+        short_description: "Server Down",
+        category: "Network"
+    }
+})
+
+Playwright automatically converts the JavaScript object into JSON.
+
+headers:
+--------------------------------------------------------------------------------
+Used to send metadata about the request.
+
+Example:
+headers: {
+    Authorization: `Bearer ${token}`,
+    "Content-Type": "application/json",
+    Accept: "application/json"
+}
+
+Headers are processed before the request body.
+
+Common headers:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Header        │ Purpose                                                    │
+├───────────────┼────────────────────────────────────────────────────────────┤
+│ Authorization │ Authentication                                             │
+│ Content-Type  │ Request Body Format                                        │
+│ Accept        │ Expected Response Format                                   │
+└───────────────┴────────────────────────────────────────────────────────────┘
+
+params:
+--------------------------------------------------------------------------------
+Used for Query Parameters.
+
+Example:
+params: {
+    sysparm_limit: 5
+}
+
+Generated URL: ...?sysparm_limit=5
+
+form:
+--------------------------------------------------------------------------------
+Used for application/x-www-form-urlencoded.
+
+Example:
+form: {
+    username: "admin",
+    password: "admin123"
+}
+
+multipart:
+--------------------------------------------------------------------------------
+Used for file uploads.
+
+Example:
+multipart: {
+    file: fs.createReadStream("error.png")
+}
+
+timeout:
+--------------------------------------------------------------------------------
+Maximum waiting time for the response.
+
+Example: timeout: 30000
+
+failOnStatusCode:
+--------------------------------------------------------------------------------
+If set to true, Playwright throws an exception for non-success HTTP status
+codes.
+
+Example: failOnStatusCode: true
+
+ignoreHTTPSErrors:
+--------------------------------------------------------------------------------
+Ignores SSL certificate validation errors.
+
+Example: ignoreHTTPSErrors: true
+
+maxRedirects:
+--------------------------------------------------------------------------------
+Maximum number of redirects Playwright will follow automatically.
+
+maxRetries:
+--------------------------------------------------------------------------------
+Automatically retries failed requests (supported retry scenarios).
+
+
+================================================================================
+                    5. UNDERSTANDING HEADERS
+================================================================================
+
+DEFINITION:
+--------------------------------------------------------------------------------
+headers?: {
+    [key: string]: string
+}
+
+It means:
+  • Header name must be a string.
+  • Header value must be a string.
+
+Example:
+headers: {
+    Authorization: "Bearer token",
+    Accept: "application/json"
+}
+
+WHY ARE SOME KEYS ENCLOSED IN QUOTES?
+--------------------------------------------------------------------------------
+Keys containing special characters must be enclosed in quotes.
+
+Correct:
+headers: {
+    "Content-Type": "application/json"
+}
+
+Incorrect:
+headers: {
+    Content-Type: "application/json"
+}
+
+Reason: JavaScript interprets Content-Type as Content - Type, which is treated
+as a subtraction expression.
+
+Keys without special characters do not require quotes.
+
+Example:
+Authorization: "Bearer token"
+Accept: "application/json"
+
+
+================================================================================
+                    6. UNDERSTANDING THE API RESPONSE
+================================================================================
+
+After sending the request:
+const response = await request.post(...)
+
+Playwright returns an APIResponse.
+
+It contains:
+APIResponse
+│
+├── status()
+├── headers()
+├── ok()
+├── json()
+└── text()
+
+
+================================================================================
+                    7. response.status()
+================================================================================
+
+Returns the HTTP Status Code.
+
+Example: response.status()
+Output: 201
+
+Used for validating whether the API returned the expected status.
+
+
+================================================================================
+                    8. response.headers()
+================================================================================
+
+Returns all response headers.
+
+Example: response.headers()
+Output:
+{
+    "content-type": "application/json",
+    "content-length": "185"
+}
+
+
+================================================================================
+                    9. response.ok()
+================================================================================
+
+Returns a boolean value: true or false.
+
+It internally checks whether the HTTP status code represents a successful
+response (generally 2xx).
+
+
+================================================================================
+                    10. response.json()
+================================================================================
+
+SIGNATURE:
+response.json(): Promise<any>
+
+Purpose: Converts the response body into a JavaScript object.
+
+Example Response:
+{
+    "result": {
+        "number": "INC0010008"
+    }
+}
+
+Usage:
+const body = await response.json();
+
+Access properties:
+body.result.number
+
+WHY Promise?
+Reading and parsing the response body is asynchronous.
+
+Hence, await response.json() is required.
+
+WHY any?
+Playwright cannot predict the structure of every API response.
+
+Therefore it returns: Promise<any>
+
+
+================================================================================
+                    11. response.text()
+================================================================================
+
+Returns the response body as plain text.
+
+Example:
+const text = await response.text();
+
+Used when the response is:
+  • Plain Text
+  • HTML
+  • XML
+  • Non-JSON content
+
+
+================================================================================
+                    12. COMPARISON OF RESPONSE METHODS
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Method             │ Returns            │ Await Required                    │
+├────────────────────┼────────────────────┼───────────────────────────────────┤
+│ response.status()  │ HTTP Status Code   │ No                                │
+│ response.headers() │ Response Headers   │ No                                │
+│ response.ok()      │ Boolean            │ No                                │
+│ response.json()    │ JavaScript Object  │ Yes                               │
+│ response.text()    │ Plain Text         │ Yes                               │
+└────────────────────┴────────────────────┴───────────────────────────────────┘
+
+
+================================================================================
+                    13. RETRIEVING VALUES FROM API RESPONSE
+================================================================================
+
+Example Response:
+{
+    "result": {
+        "sys_id": "12345",
+        "number": "INC0010008",
+        "short_description": "Server Down"
+    }
+}
+
+Retrieving values:
+const body = await response.json();
+const sysId = body.result.sys_id;
+const incidentNumber = body.result.number;
+const description = body.result.short_description;
+
+
+================================================================================
+                    14. API VALIDATION BEST PRACTICES
+================================================================================
+
+Always validate the HTTP response before extracting response data.
+
+RECOMMENDED APPROACH:
+expect(response.status()).toBe(201);
+const body = await response.json();
+
+AVOID directly accessing properties before confirming the request was successful.
+
+INCORRECT:
+const body = await response.json();
+const sysId = body.result.sys_id;
+
+If the API returns an error response, result may not exist, causing runtime
+errors.
+
+
+================================================================================
+                    15. SUCCESSFUL vs FAILED API RESPONSES
+================================================================================
+
+SUCCESSFUL RESPONSE:
+{
+    "result": {
+        "sys_id": "123",
+        "number": "INC0010008"
+    }
+}
+
+ERROR RESPONSE:
+{
+    "error": {
+        "message": "User is not authenticated"
+    },
+    "status": "failure"
+}
+
+Always inspect the response structure before accessing properties.
+
+
+================================================================================
+                    16. METHOD CHAINING IN SERVICENOW
+================================================================================
+
+STEP 1: Create Incident (POST)
+  Retrieve: sys_id, Incident Number
+
+STEP 2: Retrieve Incident (GET /api/now/table/incident/{sys_id})
+  Use the sys_id returned from the POST response.
+
+STEP 3: Validate Retrieved Record
+  expect(body.result.sys_id).toBe(userId);
+  expect(body.result.number).toBe(incidentNumber);
+
+
+================================================================================
+                    17. SERVICENOW RECORD IDENTIFIERS
+================================================================================
+
+sys_id:
+--------------------------------------------------------------------------------
+  • Internal unique identifier
+  • Used by ServiceNow APIs
+  • Primary identifier for retrieving records
+
+number:
+--------------------------------------------------------------------------------
+  • Business-friendly identifier displayed in the UI.
+  • Example: INC0010002
+
+The API retrieves records using sys_id, while number is mainly intended for
+users.
+
+
+================================================================================
+                    18. UNDERSTANDING CHOICE FIELDS
+================================================================================
+
+Fields such as:
+  • Urgency
+  • Priority
+  • Impact
+  • State
+
+are Choice Fields.
+
+Although they may display numeric values such as: 1, 2, 3
+
+they are commonly represented as string values in the API.
+
+Example:
+{
+    "urgency": "1"
+}
+
+The values represent predefined business choices rather than numbers used for
+calculations.
+
+
+================================================================================
+                             KEY TAKEAWAYS
+================================================================================
+
+  • request.post() returns a Promise<APIResponse>.
+  • data represents the request body.
+  • headers carry request metadata such as authentication and content type.
+  • Header keys containing special characters (e.g., Content-Type) must be
+    enclosed in quotes.
+  • Always validate the response status before accessing the response body.
+  • response.json() returns a JavaScript object, while response.text() returns
+    plain text.
+  • Use sys_id for record retrieval in ServiceNow APIs.
+  • Validate both sys_id and business identifiers (such as the incident number)
+    when chaining API requests.
+  • Choice fields in ServiceNow often use string values even when they appear
+    numeric.
+
+
+
+
+================================================================================
+                    API VALIDATION: POSTMAN vs PLAYWRIGHT
+================================================================================
+
+
+INTRODUCTION
+================================================================================
+
+The only difference is how you write the validation script.
+
+WHAT CAN WE VALIDATE?
+================================================================================
+
+For any API, we can validate:
+  1. Status Code
+  2. Response Time
+  3. Response Headers
+  4. Response Body
+  5. Specific Field Values
+  6. Data Types
+  7. Field Existence
+  8. Response Schema
+  9. Business Rules
+
+
+SAMPLE SERVICENOW CREATE INCIDENT RESPONSE
+================================================================================
+
+{
+    "result": {
+        "sys_id": "XXXXXXXXXXXXXXXXXXXXXXXXX",
+        "number": "INC0010002",
+        "short_description": "Server Down",
+        "urgency": "1",
+        "state": "1"
+    }
+}
+
+
+================================================================================
+                    1. STATUS CODE VALIDATION
+================================================================================
+
+POSTMAN:
+--------------------------------------------------------------------------------
+pm.test("Status code should be 201", function () {
+    pm.response.to.have.status(201);
+});
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+expect(response.status()).toBe(201);
+
+
+================================================================================
+                    2. CHECK REQUEST SUCCESS
+================================================================================
+
+POSTMAN:
+--------------------------------------------------------------------------------
+pm.test("Request Successful", function () {
+    pm.expect(pm.response.code).to.equal(201);
+});
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+expect(response.ok()).toBeTruthy();
+
+
+================================================================================
+                    3. RESPONSE TIME VALIDATION
+================================================================================
+
+POSTMAN:
+--------------------------------------------------------------------------------
+pm.test("Response time < 2000 ms", function () {
+    pm.expect(pm.response.responseTime).to.be.below(2000);
+});
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+// Playwright does not provide built-in responseTime()
+// Measure manually:
+const start = Date.now();
+const response = await request.post(url, options);
+const end = Date.now();
+expect(end - start).toBeLessThan(2000);
+
+
+================================================================================
+                    4. HEADER VALIDATION
+================================================================================
+
+POSTMAN:
+--------------------------------------------------------------------------------
+pm.test("Content-Type Validation", function () {
+    pm.expect(pm.response.headers.get("Content-Type"))
+      .to.include("application/json");
+});
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+expect(response.headers()["content-type"])
+    .toContain("application/json");
+
+
+================================================================================
+                    5. VALIDATE A FIELD VALUE
+================================================================================
+
+POSTMAN:
+--------------------------------------------------------------------------------
+const body = pm.response.json();
+
+pm.test("Verify Short Description", function () {
+    pm.expect(body.result.short_description)
+      .to.eql("Server Down");
+});
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+const body = await response.json();
+expect(body.result.short_description)
+    .toBe("Server Down");
+
+
+================================================================================
+                    6. VALIDATE FIELD EXISTS
+================================================================================
+
+POSTMAN:
+--------------------------------------------------------------------------------
+const body = pm.response.json();
+
+pm.test("sys_id exists", function () {
+    pm.expect(body.result.sys_id).to.exist;
+});
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+const body = await response.json();
+expect(body.result.sys_id).toBeDefined();
+
+
+================================================================================
+                    7. VALIDATE DATA TYPE
+================================================================================
+
+POSTMAN:
+--------------------------------------------------------------------------------
+const body = pm.response.json();
+
+pm.test("Incident Number should be String", function () {
+    pm.expect(body.result.number)
+      .to.be.a("string");
+});
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+expect(typeof body.result.number)
+    .toBe("string");
+
+
+================================================================================
+                    8. VALIDATE MULTIPLE VALUES
+================================================================================
+
+POSTMAN:
+--------------------------------------------------------------------------------
+const body = pm.response.json();
+
+pm.test("Validate Incident", function () {
+    pm.expect(body.result.urgency).to.eql("1");
+    pm.expect(body.result.state).to.eql("1");
+});
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+expect(body.result.urgency).toBe("1");
+expect(body.result.state).toBe("1");
+
+
+================================================================================
+                    9. VALIDATE PARTIAL TEXT
+================================================================================
+
+Assume: { "number": "INC0010002" }
+
+POSTMAN:
+--------------------------------------------------------------------------------
+pm.expect(body.result.number).to.include("INC");
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+expect(body.result.number).toContain("INC");
+
+
+================================================================================
+                    10. VALIDATE ENTIRE OBJECT
+================================================================================
+
+POSTMAN:
+--------------------------------------------------------------------------------
+pm.expect(body.result).to.deep.include({
+    urgency: "1",
+    state: "1"
+});
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+expect(body.result).toMatchObject({
+    urgency: "1",
+    state: "1"
+});
+
+
+================================================================================
+                    11. VALIDATE ARRAY SIZE
+================================================================================
+
+Suppose GET Incident returns: { "result": [ {}, {}, {} ] }
+
+POSTMAN:
+--------------------------------------------------------------------------------
+pm.expect(body.result.length).to.eql(3);
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+expect(body.result.length).toBe(3);
+
+
+================================================================================
+                    12. SAVE VALUES FOR METHOD CHAINING
+================================================================================
+
+POSTMAN:
+--------------------------------------------------------------------------------
+const body = pm.response.json();
+pm.environment.set("sysId", body.result.sys_id);
+
+// Retrieve later:
+pm.environment.get("sysId");
+
+PLAYWRIGHT:
+--------------------------------------------------------------------------------
+let sysId;
+const body = await response.json();
+sysId = body.result.sys_id;
+
+
+================================================================================
+                    VALIDATION COMPARISON TABLE
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Validation      │ Postman                           │ Playwright            │
+├─────────────────┼───────────────────────────────────┼───────────────────────┤
+│ Status Code     │ pm.response.to.have.status(201)   │ expect(response.      │
+│                 │                                   │ status()).toBe(201)   │
+│ Success         │ pm.response.code                  │ response.ok()         │
+│ Response Body   │ pm.response.json()                │ await response.json() │
+│ Response Header │ pm.response.headers.get()         │ response.headers()    │
+│ Field Exists    │ to.exist                          │ toBeDefined()         │
+│ Field Value     │ to.eql()                          │ toBe()                │
+│ Contains Text   │ to.include()                      │ toContain()           │
+│ Data Type       │ to.be.a()                         │ typeof                │
+│ Array Size      │ .length                           │ .length               │
+│ Save Variable   │ pm.environment.set()              │ Normal variable       │
+└─────────────────┴───────────────────────────────────┴───────────────────────┘
+
+
+================================================================================
+                    BEST PRACTICE IN PLAYWRIGHT
+================================================================================
+
+A good validation flow looks like this:
+
+const response = await request.post(url, options);
+
+// 1. Validate Status
+expect(response.status()).toBe(201);
+
+// 2. Validate Headers
+expect(response.headers()["content-type"])
+    .toContain("application/json");
+
+// 3. Parse Body
+const body = await response.json();
+
+// 4. Validate Business Data
+expect(body.result.number).toContain("INC");
+expect(body.result.short_description).toBe("Server Down");
+expect(body.result.sys_id).toBeDefined();
+expect(body.result.urgency).toBe("1");
+
+
+ORDER MAKES TESTS READABLE AND EASY TO DEBUG:
+--------------------------------------------------------------------------------
+  1. Validate the HTTP response (status and headers)
+  2. Parse the response body
+  3. Validate the business data returned by the API
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
+
+
+
