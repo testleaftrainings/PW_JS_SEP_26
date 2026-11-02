@@ -1,0 +1,82 @@
+-> Jira API
+-> BreakOut + Break
+-> GitHub repo
+-> BreakOut
+-> Framework 
+
+JIRA API:
+
+1.End point
+2.CRUD operation
+3.Authorization - username and password or API token
+4.Headers - Content-Type: application/json
+5.Body
+
+#  npm install axios
+#  https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-post
+
+# email="dilipkumar.rajendran@qeagle.com"
+# endpoint="https://qeagle-team-g1zvh4je.atlassian.net/rest/api/2/issue"
+# ApiKey="PW"
+# ApiToken="ATATT3xFfGF0-TulEs7dZk6qbsMopRhk5OF_SeU3YlO-GF_UsLfgqBBXZXOrjQoV2eVa71bVcAQGqlDY7fNx5306nSzHGcPoZd2pAyYE2T-JQLjTovVVd2OC4LhurM_ypph_bz8FniBIbEEjgI77ycUWtN6wVSUnGY9WcDZFVaBEGQTK6dRy6Ug=64C89807"
+
+# --ATATT3xFfGF0DMhI-AJnT6zWLpApEBPeEL0M78A2ob39bNE2zUg3OPA0A0V3XYPpeQ0Vbjm2aWZE9B-SEvLmS1-vCxTEoOUwQSy3-82zA0msUBt_dUswdnxvC04SN-18qBJ-PDnxuO24UzWbaj5xMgczRQJqwDKp8NYVt9r06ZhrWM104Ji9UbU=0303683B
+
+
+
+Through terminal:
+----------------
+step:1 -> Open terminal from project folder -> connect GitHub
+stpe:2 -> Initialize the git report
+                git init
+step:3 -> Check if you are connected with remote repo of yours
+                git remote -v
+
+              it shows the repo as 
+PS C:\Users\DELL\Documents\PageObjectModel> git remote -v
+origin  https://github.com/vidya1926/Framework_PW.git (fetch)
+origin  https://github.com/vidya1926/Framework_PW.git (push)  
+       --> if not add your username and email 
+       git congig --global user.email "mail@example.com"
+       git config --global user.name "username"
+
+step:4 -->add files to the repo 
+          git add . 
+
+step:5 --> commmit the message
+           git commit
+
+
+step:6 --->Add the remote  url where to push the code should have .git as extention
+             git add remote http://usermame-repo.git
+
+step:7 --> push the file
+        git push -u origin master/main
+
+
+step:8-> git pull
+        git pull origin master/main
+
+
+
+echo "# Playwright_Aug_25" >> README.md
+git init
+git add . or git add README.md
+git commit -m "Version 1.0"
+
+git remote add origin https://github.com/Dilip2005/Playwright_Aug_25.git
+git push -u origin main
+git push -u origin master
+
+git pull
+
+
+echo "# PW_OCT_WD-25" >> README.md
+git init
+git add .
+git commit -m "first commit"
+git branch -M main -> is not need if you push into master
+git remote add origin https://github.com/Dilip2005/PW_OCT_WD-25.git
+git push -u origin master
+
+

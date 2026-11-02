@@ -1,0 +1,59 @@
+
+What is Git and GitHub?
+Git and GitHub are important tools used in software development, 
+especially in automation testing projects like Playwright with TypeScript.
+1. What is Git?
+Git is a Distributed Version Control System (VCS).
+It helps developers to:
+•	Track changes in source code.
+•	Maintain different versions of a project.
+•	Create and manage branches.
+•	Revert unwanted changes.
+•	Merge code from different developers.
+•	Work on the same project collaboratively.
+Example:
+Suppose you are developing a Playwright automation framework.
+•	Day 1: You create a login test.
+•	Day 2: You add a search functionality test.
+•	Day 3: You modify the login test.
+Git tracks all these changes. If something goes wrong, you can go back to an earlier version.
+2. What is GitHub?
+GitHub is a cloud-based platform that hosts Git repositories.
+It helps developers to:
+•	Store code online.
+•	Share code with team members.
+•	Collaborate with other developers.
+•	Create Pull Requests (PR).
+•	Review code.
+•	Manage issues.
+•	Integrate CI/CD using GitHub Actions.
+Example:
+You develop your Playwright framework on your local machine using VS Code.
+You use Git to track your changes and GitHub to push and store your project online.
+3. Git vs GitHub
+        Git	                           GitHub
+Version control tool               	  Code hosting platform
+Installed locally	                    Cloud-based platform
+Tracks code changes                  	Stores Git repositories
+Manages branches	                    Provides Pull Requests
+Supports commit and merge	            Supports code reviews
+Works offline	                        Requires internet for remote operations
+
+
+
+Common - 
+locator
+Alert
+frame
+
+T-1
+locator
+Window
+Alert
+frame -> push to common repository(PR) -> merge conflict -
+
+common merge
+locator
+window
+Alert
+frame
